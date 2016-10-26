@@ -1,6 +1,6 @@
 '''
 **********************************************************************************************
-Library of functions written to accompany the algorithms described in Introduction to Robotics: Mechanics, Planning, and Control.
+Library of functions written to accompany the algorithms described in Modern Robotics:  Mechanics, Planning, and Control.
 **********************************************************************************************
 **********************************************************************************************
 Author: Mikhail Todes

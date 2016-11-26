@@ -16,7 +16,7 @@ function invR = RotInv(R)
 %     0     0     1
 %     1     0     0
 [m,n]=size(R);
-if norm(R'*R-eye(n))<0.05 && norm(det(R)-1)<0.05
+if norm(R'*R-eye(n))<1e-5 && norm(det(R)-1)<1e-5
     invR=R';
 else
     msg = 'Inverse cannot be calculated.';

@@ -24,10 +24,10 @@ function S = ScrewToAxis(q,s,h)
 %     0
 %    -3
 %     2
-if length(q)==3 && length(s)==3 && norm(Magnitude(s)-1)<0.01 
+if length(q)==3 && length(s)==3 && norm(Magnitude(s)-1)<1e-5 
     v=cross(q,s)+h*s;
     S=[s(1);s(2);s(3);v(1);v(2);v(3)];
-    if norm(Magnitude(s))>0.01
+    if norm(Magnitude(s))>1e-5
         S=S/Magnitude(s);
     else
         S=S/Magnitude(v);

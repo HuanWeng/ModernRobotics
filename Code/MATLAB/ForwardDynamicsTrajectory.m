@@ -77,8 +77,8 @@ for i=1:size(taumat,1)
     for j=1:intRes
         ddthetalist = ForwardDynamics(thetalist,dthetalist,taumat(i,:),g,NewFtipmat(i,:),Mlist,Glist,Slist);
         [thetalist,dthetalist] = EulerStep(thetalist,dthetalist,ddthetalist,(dt/intRes));
-        thetamat(size(thetamat,1)+1,:) = thetalist;
-        dthetamat(size(dthetamat,1)+1,:) = dthetalist;
+    thetamat(size(thetamat,1)+1,:) = thetalist;
+    dthetamat(size(dthetamat,1)+1,:) = dthetalist;
     end
 end
 end

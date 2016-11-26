@@ -68,7 +68,7 @@ Output:
     '''
     try:
         length = Magnitude(V)
-        if (length == 0.):
+        if (abs(length) < 1e-5):
             for i in range(len(V)):
                 V[i] = 0.0
             return V
@@ -113,7 +113,7 @@ Output:
     '''
     try:
         #Test for determinant = 1 +- 0.05 error
-        if (det(R)*1.0>=0.95 and det(R)*1.0<=1.05):
+        if (abs(det(R) - 1) < 1e-5):
             invR = [[R[0][0],R[1][0],R[2][0]],[R[0][1],R[1][1],R[2][1]],[R[0][2],R[1][2],R[2][2]]]
         else:
             print ("Determinant of the input matrix does not equal 1")
@@ -237,7 +237,7 @@ Output:
     '''
     if (len(p)==3 and np.shape(R)==(3,3)):
         #Test for determinant = 1 +- 0.05 error
-        if (det(R)*1.0>=0.95 and det(R)*1.0<=1.05):
+        if (abs(det(R) - 1) < 1e-5):
             return [ [R[0][0],R[0][1],R[0][2],p[0]] , [R[1][0],R[1][1],R[1][2],p[1]], [R[2][0],R[2][1],R[2][2],p[2]] , [0,0,0,1]]
         print ("Input R is not a rotation matrix")
     else:
@@ -394,9 +394,9 @@ Output:
     '''
     if (len(expc6)==6):
         theta = Magnitude([expc6[0],expc6[1],expc6[2]])
-        if (theta == 0):
+        if (abs(theta) < 1e-5):
             theta = Magnitude([expc6[3],expc6[4],expc6[5]])
-            if (theta==0):
+            if (abs(theta) < 1e-5):
                 return ([0,0,0,0,0,0],0)
             return ([expc6[0]/theta*1.0,expc6[1]/theta*1.0,expc6[2]/theta*1.0,
                      expc6[3]/theta*1.0,expc6[4]/theta*1.0,expc6[5]/theta*1.0],
@@ -425,7 +425,7 @@ Output:
     '''
     S,theta = AxisAng6(expc6)
     omg = [S[0],S[1],S[2]]
-    if (Magnitude([expc6[0],expc6[1],expc6[2]])>0):
+    if (Magnitude([expc6[0],expc6[1],expc6[2]])>1e-5):
         UL = np.eye(3) + matmult(VecToso3(omg),np.sin(theta)) + matmult(VecToso3(omg),VecToso3(omg))*(1-np.cos(theta))
         UR = matmult(np.eye(3),theta) + matmult(VecToso3(omg),(1-np.cos(theta))) + matmult(VecToso3(omg),VecToso3(omg))*(theta-np.sin(theta))
         UR = np.dot(UR,[S[3],S[4],S[5]])
@@ -448,13 +448,13 @@ Output:
     '''
     R,p = TransToRp(T)
     Rtrace = R[0][0]+R[1][1]+R[2][2]
-    if(R==np.eye(3)).all():
+    if(np.linalg.norm(R - np.eye(3)) - 1 < 1e-5):
         omg=[0,0,0]
         v=p
         theta=1
     
     else:
-        if(Rtrace == -1):
+        if(abs(Rtrace + 1) < 1e-5):
             theta = pi
             omg = MatrixLog3(R)
             G = (1/theta)*np.eye(3) - 0.5*np.asarray(VecToso3(omg)) + ((1/theta)-((1/(tan(theta/2.0)))/2.0))*(matmult(VecToso3(omg),VecToso3(omg)))
@@ -657,7 +657,7 @@ True
     wb  = Magnitude ([Vb[0],Vb[1],Vb[2]])
     vb = Magnitude ([Vb[3],Vb[4],Vb[5]])
     for i in range (maxiterations):
-        if (wb>eomg and vb>ev):
+        if (wb>eomg or vb>ev):
             thetalist0 = np.add(thetalist0, matmult(np.linalg.pinv(JacobianBody(Blist, thetalist0)),Vb))
             thf.append(thetalist0)
             Vb = MatrixLog6(matmult(TransInv(FKinBody(M, Blist, thetalist0)),T))
@@ -695,12 +695,12 @@ M = [[1,0,0,0],
     [0,0,1,0.910],
     [0,0,0,1]]
 T = [[1,0,0,0.4], [0,1,0,0], [0,0,1,0.4], [0,0,0,1]]
-thetalist0 = [0.1,0.1,0.1,0.1,0.1,0.1,0.1]
+thetalist0 = [0,0,0,0,0,0,0]
 eomg = 0.01
 ev = 0.001
 Output:
 thetalist:
-[6.93483863   7.12127381  -17.44241224  -20.55900553  -8.60119276  17.30667641  13.69803296]
+[3.60471147e-14, 1.35367679e+00, 4.40904444e-14, -1.71003042e+00, -4.43143087e-14, 3.56353634e-01, -1.64927787e-13]
 success:
 True
     '''
@@ -712,9 +712,9 @@ True
     wb  = Magnitude ([Vs[0],Vs[1],Vs[2]])
     vb = Magnitude ([Vs[3],Vs[4],Vs[5]])
     for i in range (maxiterations):
-        if (wb>eomg and vb>ev):
-            Jb = matmult(Adjoint(TransInv(FKinSpace(M, Slist, thetalist0))),JacobianSpace(Slist, thetalist0))
-            thetalist0 = np.add(thetalist0, matmult(np.linalg.pinv(Jb),Vs))
+        if (wb>eomg or vb>ev):
+            Js = JacobianSpace(Slist, thetalist0)
+            thetalist0 = np.add(thetalist0, matmult(np.linalg.pinv(Js),Vs))
             thf.append(thetalist0)
             Vs = MatrixLog6(matmult(TransInv(FKinSpace(M, Slist, thetalist0)),T))
             wb  = Magnitude ([Vs[0],Vs[1],Vs[2]])
@@ -1238,8 +1238,8 @@ plt.show()
         for j in range(intRes):
             ddthetalist = ForwardDynamics(thetalist, dthetalist, taumat[i], g, NewFtipmat[i], Mlist, Glist, Slist)
             thetalist,dthetalist = EulerStep(thetalist,dthetalist,ddthetalist,(dt/intRes))
-            thetamat.append(thetalist)
-            dthetamat.append(dthetalist)
+        thetamat.append(thetalist)
+        dthetamat.append(dthetalist)
     return thetamat, dthetamat
 
 

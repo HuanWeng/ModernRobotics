@@ -18,11 +18,11 @@ function [S,theta] = AxisAng6(expc6)
 % theta =
 %     1
 if length(expc6)==6
-    if norm(Magnitude(expc6(1:3)))>0.01
+    if norm(Magnitude(expc6(1:3)))>1e-5
         theta=Magnitude(expc6(1:3));
         S=expc6/theta;
     else
-        if norm(Magnitude(expc6(4:6)))>0.01
+        if norm(Magnitude(expc6(4:6)))>1e-5
         theta=Magnitude(expc6(4:6));
         S=expc6/theta;
         else

@@ -18,9 +18,9 @@ function expc3 = MatrixLog3(R)
 %    1.2092
 [m,n]=size(R);
 if norm(R'*R-eye(n))<0.01 && norm(det(R)-1)<0.01 && m==3 && n==3
-    if norm(R-eye(3))<0.01
+    if norm(R-eye(3))<1e-5
         expc3=[0;0;0];
-    elseif norm(R(1,1)+R(2,2)+R(3,3)+1)<0.0001
+    elseif norm(R(1,1)+R(2,2)+R(3,3)+1)<1e-5
         theta=pi;
         if (1+R(3,3))>0.01
             omg=(1/(2*(1+R(3,3)))^0.5)*[R(1,3);R(2,3);1+R(3,3)];

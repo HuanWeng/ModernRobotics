@@ -28,14 +28,14 @@ function [thetalist,success] = IKinSpace(Slist,M,T,thetalist0,eomg,ev)
   Slist = [[0,0,1,0,0,0]; [0,1,0,0,0,0]; [0,0,1,0,0,0];[0,1,0,-0.550,0,0.045]; [0,0,1,0,0,0]; [0,1,0,-0.850,0,0]; [0,0,1,0,0,0]];
   M = [[1,0,0,0]; [0,1,0,0]; [0,0,1,0.910]; [0,0,0,1]];
   T = [[1,0,0,0.4]; [0,1,0,0]; [0,0,1,0.4]; [0,0,0,1]];
-  thetalist0 = [0.1,0.1,0.1,0.1,0.1,0.1,0.1];
+  thetalist0 = [0,0,0,0,0,0,0];
   eomg = 0.01;
   ev = 0.001;
   [thetalist,success] = IKinSpace(Slist,M,T,thetalist0,eomg,ev)
 %}
 % Output:
 % thetalist =
-%    6.9348    7.1213  -17.4424  -20.5590   -8.6012   17.3067   13.6980
+%    0.0000    1.3537   -0.0000   -1.7100    0.0000    0.3564    0.0000
 % success =
 %     1
 maxiterations = 20;
@@ -45,15 +45,15 @@ vs=MatrixLog6(TransInv(FKinSpace(M,Slist,thetalist0))*T);
 w=vs(1:3);
 v=vs(4:6);
 thf(1,:)=thetalist0;
+thetalist = thetalist0;
 while ( Magnitude(w)>eomg || Magnitude(v)>ev ) && i<maxiterations
-    Jb = (Adjoint(TransInv(FKinSpace(M, Slist, thf(i+1,:)))))*(JacobianSpace(Slist,thf(i+1,:)));
-    thf(i+2,:)=thf(i+1,:)+(pinv(Jb)*vs)';
+    thf(i+2,:)=thf(i+1,:)+(pinv((JacobianSpace(Slist,thf(i+1,:))))*vs)';
     i=i+1;
     vs=MatrixLog6(TransInv(FKinSpace(M,Slist,thf(i+1,:)))*T);
     w=vs(1:3);
     v=vs(4:6);
     thetalist = thf(i+1,:);
-    if (i == maxiterations-1)
+    if (i == maxiterations)
         success = false;
     end
 end

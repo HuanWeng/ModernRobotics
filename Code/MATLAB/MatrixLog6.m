@@ -22,11 +22,11 @@ function expc6 = MatrixLog6(T)
 [m,n]=size(T);
 if m==4 && n==4
     [R,p]=TransToRp(T);
-    if norm(R-eye(3))<0.001
+    if norm(R-eye(3))<1e-5
         omg=[0;0;0];
         v=p/Magnitude(p);
         theta=Magnitude(p);
-    elseif norm(R(1,1)+R(2,2)+R(3,3)+1)<0.001
+    elseif norm(R(1,1)+R(2,2)+R(3,3)+1)<1e-5
         theta=pi;
         omg=MatrixLog3(R);
         v=(eye(3)/theta-0.5*VecToso3(omg)+(1/theta-0.5*cot(theta/2))*VecToso3(omg)*VecToso3(omg))*p;

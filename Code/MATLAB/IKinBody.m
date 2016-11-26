@@ -45,6 +45,7 @@ vb=MatrixLog6(TransInv(FKinBody(M,Blist,thetalist0))*T);
 w=vb(1:3);
 v=vb(4:6);
 thf(1,:)=thetalist0;
+thetalist = thetalist0;
 while ( Magnitude(w)>eomg || Magnitude(v)>ev ) && i<maxiterations
     thf(i+2,:)=thf(i+1,:)+(pinv(JacobianBody(Blist,thf(i+1,:)))*vb)';
     i=i+1;
@@ -52,7 +53,7 @@ while ( Magnitude(w)>eomg || Magnitude(v)>ev ) && i<maxiterations
     w=vb(1:3);
     v=vb(4:6);
     thetalist = thf(i+1,:);
-    if (i == maxiterations-1)
+    if (i == maxiterations)
         success = false;
     end
 end

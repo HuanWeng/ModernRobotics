@@ -19,7 +19,7 @@ function  R = MatrixExp3(expc3)
 %   -0.1920   -0.3038    0.9332
 %    0.6930    0.6313    0.3481
 if length(expc3)==3
-    if norm(expc3)<0.001
+    if norm(expc3)<1e-5
         R=eye(3);
     else
     [omghat,theta]=AxisAng3(expc3);

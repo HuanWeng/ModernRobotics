@@ -27,7 +27,7 @@ if length(expc6)==6
     end
     omg=expc6(1:3);
     v=expc6(4:6);
-    if norm(omg)>10^-5
+    if norm(omg)>1e-5
         [omg2,theta]=AxisAng3(omg);
         UL=eye(3)+sin(theta)*VecToso3(omg2)+(1-cos(theta))*VecToso3(omg2)*VecToso3(omg2);
         v2=v/theta;

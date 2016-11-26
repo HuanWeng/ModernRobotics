@@ -1,0 +1,10 @@
+What I changed:
+RotInv MatrixExp3 MatrixLog3 RpToTrans ScrewToAxis AxisAng6 MatrixExp6 MatrixLog6 IKinBody IKinSpace ForwardDynamicsTrajectory 
+
+
+The most serious problem I find is actually caused by the incorrespondence of calculation precision.
+
+For example:
+In one step of a function, we need to verify if R=1, where R is a number calculated from former steps. If we calculate R by hand, we may get R=1. However, the computer shows R=1.000, which is equal to 1 but has a little error (less than 1e-6). When this R=1.000 comes to the judgement R==1, it shows False. Same things happen if we verify whether two matrices are equal. This problem usually appears when we use MatrixLog3 and MatrixLog6 because the algorithms of them include many judgements, which lead to different methods. Similar situations occur in most functions of Mathematica and Python and some in Matlab. The author of Matlab version relized this situation but some functions still need to be improved. The author of Mathematica met this bug and tried to avoid it, but he failed.
+
+I think this problem is caused by the complicated equations in the functions which include many trigonometric functions. So in the codes we should not use judgements such as: R == Identity(3) or theta == 0. Instead we should use Norm(R - Identity(3)) < 1e-5 or Abs(theta) < 1e-5

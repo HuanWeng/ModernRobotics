@@ -45,7 +45,8 @@ function ddthetalist = ForwardDynamics(thetalist,dthetalist,taulist,g,Ftip,Mlist
 % ddthetalist =
 %  -17.3288   20.9946   10.3651
 RHS = ((taulist-VelQuadraticForces(thetalist,dthetalist,Mlist,Glist,Slist)-GravityForces(thetalist,g,Mlist,Glist,Slist)-EndEffectorForces(thetalist,Ftip,Mlist,Glist,Slist))');
-InMatTrans=(MassMatrix(thetalist,Mlist,Glist,Slist))';
-ddthetalist= (InMatTrans*RHS)';
+InMatTrans=MassMatrix(thetalist,Mlist,Glist,Slist);
+ddthetalist= (InMatTrans'\RHS)';
+
 end
 

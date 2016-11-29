@@ -75,11 +75,15 @@ thetamat(1,:)=thetalist;
 dthetamat(1,:)=dthetalist;
 for i=1:size(taumat,1)
     for j=1:intRes
-        ddthetalist = ForwardDynamics(thetalist,dthetalist,taumat(i,:),g,NewFtipmat(i,:),Mlist,Glist,Slist);
-        [thetalist,dthetalist] = EulerStep(thetalist,dthetalist,ddthetalist,(dt/intRes));
+       ddthetalist = ForwardDynamics(thetalist,dthetalist,taumat(i,:),g,NewFtipmat(i,:),Mlist,Glist,Slist);     
+       [thetalist,dthetalist] = EulerStep(thetalist,dthetalist,ddthetalist,(dt/intRes));
+    end
     thetamat(size(thetamat,1)+1,:) = thetalist;
     dthetamat(size(dthetamat,1)+1,:) = dthetalist;
-    end
 end
 end
+
+
+
+%(-1.0)*(MassMatrix(thetalist,Mijlist,Glist,Slist)\InverseDynamics(thetalist,dthetalist,[0.0,0.0,0.0,0.0,0.0,0.0],g,[0.0,0.0,0.0,0.0,0.0],Mlist,Glist,Slist))
 

@@ -117,7 +117,7 @@ Output:
             invR = [[R[0][0],R[1][0],R[2][0]],[R[0][1],R[1][1],R[2][1]],[R[0][2],R[1][2],R[2][2]]]
         else:
             print ("Determinant of the input matrix does not equal 1")
-        if(matmult(R,invR) == np.eye(3)).all:#Test to make sure R*invR=I 
+        if (np.linalg.norm(matmult(R,invR) - np.eye(3)) - 1 < 1e-5):#Test to make sure R*invR=I 
             return invR
     except:
         print("Inverse cannot be calculated")
@@ -150,10 +150,10 @@ Output:
 [1, 2, 3]
     '''
     try:
-        if (so3mat[0][0]==0 and so3mat[1][1]==0 and so3mat[2][2]==0 and
-        so3mat[0][1]==-so3mat[1][0] and
-        so3mat[2][0]==-so3mat[0][2] and 
-        so3mat[1][2]==-so3mat[2][1]):#Check if input is a skew-symmetric matrix
+        if (abs(so3mat[0][0]) < 1e-5 and abs(so3mat[1][1]) < 1e-5 and abs(so3mat[2][2]) < 1e-5 and
+        abs(so3mat[0][1] + so3mat[1][0]) < 1e-5 and
+        abs(so3mat[2][0] + so3mat[0][2]) < 1e-5 and 
+        abs(so3mat[1][2] + so3mat[2][1]) < 1e-5):#Check if input is a skew-symmetric matrix
                 return [so3mat[2][1],so3mat[0][2],so3mat[1][0]] #omg
         else:
             print ("Input is not a skew-symmetric matrix")
@@ -172,7 +172,7 @@ Output:
     '''
     if (len(expc3)==3):
         theta = Magnitude(expc3)
-        if (theta == 0):
+        if (abs(theta) < 1e-5):
             return ([0,0,0],0)
         else:
             return (Normalize(expc3), theta)#(omghat, theta)
@@ -211,7 +211,12 @@ Output:
     if (np.shape(R)==(3,3)):
         try:
             Rtrace = R[0][0]+R[1][1]+R[2][2]
-            theta = np.arccos((Rtrace - 1)/2.0)
+	    acosinput = (Rtrace - 1)/2.0
+	    if acosinput > 1:
+		acosinput = 1
+	    if acosinput < -1:
+		acosinput = -1	
+            theta = np.arccos(acosinput)
             omg = 1/(2*np.sin(theta))*np.array([R[2][1]-R[1][2], R[0][2]-R[2][0], R[1][0]-R[0][1]])
             if any(map(np.isinf, omg)) or any(map(np.isnan, omg)):
                 theta = 0
@@ -264,8 +269,7 @@ Output:
                   [T[1][0],T[1][1],T[1][2]],
                   [T[2][0],T[2][1],T[2][2]]]
         p = [T[0][3],T[1][3],T[2][3]]
-        #Test for determinant = 1 +- 0.05 error
-        if (det(R)*1.0>=0.95 and det(R)*1.0<=1.05):
+        if (abs(det(R)*1.0-1)<1e-5):
             return R,p
         print ("Input is not a transformation matrix")
     else:
@@ -448,11 +452,10 @@ Output:
     '''
     R,p = TransToRp(T)
     Rtrace = R[0][0]+R[1][1]+R[2][2]
-    if(np.linalg.norm(R - np.eye(3)) - 1 < 1e-5):
+    if(abs(np.linalg.norm(R - np.eye(3))) < 1e-5):
         omg=[0,0,0]
         v=p
-        theta=1
-    
+        theta=1    
     else:
         if(abs(Rtrace + 1) < 1e-5):
             theta = pi
@@ -461,7 +464,12 @@ Output:
             v = np.dot(G,p)
 
         else:
-            theta = acos((Rtrace-1)/2.0)
+	    acosinput = (Rtrace-1)/2.0
+	    if acosinput > 1:
+		acosinput = 1
+	    if acosinput < -1:
+		acosinput = -1
+            theta = acos(acosinput)
             omg = so3ToVec((1/(2*np.sin(theta)))*(np.subtract(R, RotInv(R))))
             G = (1/theta)*np.eye(3) - 0.5*np.asarray(VecToso3(omg)) + ((1/theta)-((1/(tan(theta/2.0)))/2.0))*(matmult(VecToso3(omg),VecToso3(omg)))
             v = np.dot(G,p)     
@@ -700,7 +708,7 @@ eomg = 0.01
 ev = 0.001
 Output:
 thetalist:
-[3.60471147e-14, 1.35367679e+00, 4.40904444e-14, -1.71003042e+00, -4.43143087e-14, 3.56353634e-01, -1.64927787e-13]
+[1.68267377e-15, 1.35367679e+00, 8.56077864e-15, -1.71003042e+00, -5.59462995e-15, 3.56353634e-01, 6.19601080e-15]
 success:
 True
     '''

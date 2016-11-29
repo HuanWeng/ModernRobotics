@@ -48,29 +48,32 @@ function taulist = InverseDynamics(thetalist,dthetalist,ddthetalist,g,Ftip,Mlist
 n=size(Slist,1);
 Mi=Mlist(1:4,:);
 Ai = (Adjoint(TransInv(Mi))*Slist(1,:)')';
+
 Ti = Mi*MatrixExp6(Ai*thetalist(1));
 Vi = ((Adjoint(TransInv(Ti)))*([0,0,0,0,0,0]'))'+(Ai*dthetalist(1));
 Vdi = ((Adjoint(TransInv(Ti)))*([0,0,0,-g(1),-g(2),-g(3)]'))' + ((ad(Vi)*Ai')'*dthetalist(1)) + (Ai*ddthetalist(1));
 %****************************
 %*****Forward Iteration******
 for i=2:n
-    Mi = [Mi;Mi(size(Mi,1)-3:size(Mi,1),:)*Mlist(4*i-3:4*i,:)];
-    Ai = [Ai;(Adjoint(TransInv(Mi(size(Mi,1)-3:size(Mi,1),:)))*Slist(i,:)')'];
-    Ti = [Ti;Mlist(4*i-3:4*i,:)*MatrixExp6(Ai(i,:)*thetalist(i))];
+    Mi = Mi*Mlist(4*i-3:4*i,:);
+    Ai = [Ai;(Adjoint(TransInv(Mi))*Slist(i,:)')'];
+    Ti = [Ti;Mlist(4*i-3:4*i,:)*MatrixExp6(Ai(i,:)*thetalist(i))];    
     Vi = [Vi;((Adjoint(TransInv(Ti(4*i-3:4*i,:))))*(Vi(i-1,:)'))'+(Ai(i,:)*dthetalist(i))];
     Vdi = [Vdi;((Adjoint(TransInv(Ti(4*i-3:4*i,:))))*(Vdi(i-1,:)'))' + ((ad(Vi(i,:))*Ai(i,:)')'*dthetalist(i)) + (Ai(i,:)*ddthetalist(i))];
 end
 %****************************
 
+
 %******INITIALISATION********
 Fi=zeros(n,6);
-Fi(n,:) = (Adjoint(TransInv(Ti(4*n-3:4*n,:))))'*Ftip' + (Glist(6*n-5:6*n,:)*Vdi(n,:)') - ((ad(Vi(n,:))')*(Vi(n,:)*Glist(6*n-5:6*n,:))');
+%Fi(n,:) = (Adjoint(TransInv(Ti(4*n-3:4*n,:))))'*Ftip' + (Glist(6*n-5:6*n,:)*Vdi(n,:)') - ((ad(Vi(n,:))')*(Vi(n,:)*Glist(6*n-5:6*n,:))');
+Fi(n,:) = (Glist(6*n-5:6*n,:)*Vdi(n,:)' - ad(Vi(n,:))'*(Glist(6*n-5:6*n,:)*Vi(n,:)'))';
 taulist = zeros(1,n);
-taulist(n) = ((Fi(n,:))*Ai(n,:)');
+taulist(n) = Fi(n,:)*Ai(n,:)';
 %****************************
 %*****Backward Iteration*****
 for i = n-1:-1:1
-    Fi(i,:) = (Adjoint(TransInv(Ti(4*i-3:4*i,:))))'*Ftip' + (Glist(6*i-5:6*i,:)*Vdi(i,:)') - ((ad(Vi(i,:))')*(Vi(i,:)*Glist(6*i-5:6*i,:))');
-    taulist(i) = ((Fi(i,:))*Ai(i,:)');
+    Fi(i,:) = (Adjoint(TransInv(Ti(4*i+1:4*i+4,:)))'*Fi(i+1,:)' + (Glist(6*i-5:6*i,:)*Vdi(i,:)') - ad(Vi(i,:))'* (Glist(6*i-5:6*i,:)*Vi(i,:)'))';       
+    taulist(i) = Fi(i,:)*Ai(i,:)';
 end
 %****************************

@@ -31,7 +31,13 @@ if m==4 && n==4
         omg=MatrixLog3(R);
         v=(eye(3)/theta-0.5*VecToso3(omg)+(1/theta-0.5*cot(theta/2))*VecToso3(omg)*VecToso3(omg))*p;
     else
-        theta=acos((R(1,1)+R(2,2)+R(3,3)-1)/2);
+        acosinput = (R(1,1)+R(2,2)+R(3,3)-1)/2;
+        if acosinput > 1
+            acosinput = 1;
+        elseif acosinput < -1
+            acosinput = -1;
+        end
+        theta=acos(acosinput);
         w1=1/(2*sin(theta))*(R-R');
         omg=so3ToVec(w1);
         v=(eye(3)/theta-0.5*VecToso3(omg)+(1/theta-0.5*cot(theta/2))*VecToso3(omg)*VecToso3(omg))*p;

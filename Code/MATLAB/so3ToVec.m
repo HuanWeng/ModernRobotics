@@ -17,7 +17,7 @@ function omg = so3ToVec(so3mat)
 %     3
 
 [m,n]=size(so3mat);
-if m==3 && n==3 && norm(so3mat(1,1))<10^-3 && norm(so3mat(2,2))<10^-3 && norm(so3mat(3,3))<10^-3 && norm(so3mat(1,2)+so3mat(2,1))<10^-3     && norm(so3mat(1,3)+so3mat(3,1))<10^-3 && norm(so3mat(3,2)+so3mat(2,3))<10^-3
+if m==3 && n==3 && norm(so3mat(1,1))<1e-5 && norm(so3mat(2,2))<1e-5 && norm(so3mat(3,3))<1e-5 && norm(so3mat(1,2)+so3mat(2,1))<1e-5     && norm(so3mat(1,3)+so3mat(3,1))<1e-5 && norm(so3mat(3,2)+so3mat(2,3))<1e-5
     omg=[so3mat(3,2);so3mat(1,3);so3mat(2,1)];
 else
     msg = 'Input is not a skew-symmetric matrix.';

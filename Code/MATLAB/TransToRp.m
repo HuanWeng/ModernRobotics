@@ -25,7 +25,7 @@ rt=T(1:3,1:3);
 pt=T(1:3,4);
 [m,n]=size(T);
 if m==4 && n==4
-    if norm(rt'*rt-eye(3))<0.01 && norm(det(rt)-1)<0.01
+    if norm(rt'*rt-eye(3))<1e-5 && norm(det(rt)-1)<1e-5
         R=rt;
         p=pt;
     else

@@ -48,7 +48,7 @@ for i=1:n
    ddthetalist=zeros(1,n);
    ddthetalist(i)=1;
    taulist=InverseDynamics(thetalist,dthetalist,ddthetalist,g,Ftip,Mlist,Glist,Slist);
-   M=[M; taulist];
+   M=[M,taulist'];
 end
 end
 

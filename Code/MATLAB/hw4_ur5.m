@@ -53,5 +53,5 @@ dt = 0.01;
 intRes = 10;
 
 [thetamat,dthetamat] = ForwardDynamicsTrajectory(thetalist,dthetalist,taumat,g,Ftipmat,Mlist,Glist,Slist,dt,intRes);
-csvwrite('/Users/51ibm/Dropbox/ur5robot.csv',thetamat)
+csvwrite('C:\Users\51ibm\Desktop\ur5robot.csv',thetamat)
 

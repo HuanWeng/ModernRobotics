@@ -66,8 +66,7 @@ end
 
 %******INITIALISATION********
 Fi=zeros(n,6);
-%Fi(n,:) = (Adjoint(TransInv(Ti(4*n-3:4*n,:))))'*Ftip' + (Glist(6*n-5:6*n,:)*Vdi(n,:)') - ((ad(Vi(n,:))')*(Vi(n,:)*Glist(6*n-5:6*n,:))');
-Fi(n,:) = (Glist(6*n-5:6*n,:)*Vdi(n,:)' - ad(Vi(n,:))'*(Glist(6*n-5:6*n,:)*Vi(n,:)'))';
+Fi(n,:) = (Adjoint(TransInv(Mlist(4*n+1:4*n+4,:)))'* Ftip' + Glist(6*n-5:6*n,:)*Vdi(n,:)' - ad(Vi(n,:))'*(Glist(6*n-5:6*n,:)*Vi(n,:)'))';
 taulist = zeros(1,n);
 taulist(n) = Fi(n,:)*Ai(n,:)';
 %****************************

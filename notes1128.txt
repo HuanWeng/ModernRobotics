@@ -1,0 +1,4 @@
+Unified the acceptable errors to be 1e-5.
+Made tests for input availability of acos().
+Focused on functions in Ch1-6. Only went through Ch9.
+Just guaranteed that the functions can work well. More improvement coming soon.

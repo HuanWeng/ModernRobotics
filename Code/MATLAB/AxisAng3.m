@@ -16,12 +16,7 @@ function [omghat,theta] = AxisAng3(expc3)
 %    0.2673    0.5345    0.8018
 % theta =
 %    3.7417
-if length(expc3)==3
-    theta=Magnitude(expc3);
-    omghat=Normalize(expc3);
-else
-    msg = 'Input vector is the wrong size.';
-    error(msg);
-end
+    theta=norm(expc3);
+    omghat=expc3/theta;
 end
 

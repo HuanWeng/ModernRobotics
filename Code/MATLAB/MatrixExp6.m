@@ -2,7 +2,7 @@
 %****************************  CHAPTER 3: RIGID-BODY MOTIONS  *********************************
 %**********************************************************************************************
 
-function T = MatrixExp6(expc6)
+function T = MatrixExp6(expmat)
 % Takes a 6-vector of exponential coordinates (S*theta) 
 % Returns a T matrix SE(3) that is achieved by traveling along/about the screw axis S 
 % for a distance theta from an initial configuration T = I
@@ -10,8 +10,11 @@ function T = MatrixExp6(expc6)
 % Example Input:
 %{
   clear;clc;
-  expc6 = [1.5707963267948966, 0.0, 0.0, 0.0, 2.3561944901923448,2.3561944901923457];
-  T = MatrixExp6(expc6)
+  expmat = [ 0, 0, 0, 0;
+             0, 0, -1.5708, 2.3562;
+             0, 1.5708, 0, 2.3562;
+             0, 0, 0, 0]
+  T = MatrixExp6(expmat)
 %}
 % Output:
 % T =
@@ -20,25 +23,14 @@ function T = MatrixExp6(expc6)
 %         0    1.0000    0.0000    3.0000
 %         0         0         0    1.0000
 
-if length(expc6)==6
-    m=size(expc6);
-    if m(1)==1 && m(2)==6
-        expc6=expc6';
-    end
-    omg=expc6(1:3);
-    v=expc6(4:6);
-    if norm(omg)>1e-5
-        [omg2,theta]=AxisAng3(omg);
-        UL=eye(3)+sin(theta)*VecToso3(omg2)+(1-cos(theta))*VecToso3(omg2)*VecToso3(omg2);
-        v2=v/theta;
-        UR=(eye(3)*theta+(1-cos(theta))*VecToso3(omg2)+(theta-sin(theta))*VecToso3(omg2)*VecToso3(omg2))*v2;
-        T=[UL,UR;0,0,0,1];
-    else
-        T=[1,0,0,expc6(4);0,1,0,expc6(5);0,0,1,expc6(6);0,0,0,1];
-    end
+omgtheta = so3ToVec(expmat(1:3,1:3));
+if Nearzero(norm(omgtheta))
+    T = [MatrixExp3(expmat(1:3,1:3)),expmat(1:3,4);0,0,0,1];
 else
-    msg = 'Input is not appropriate.';
-    error(msg);
+    [omghat,theta] = AxisAng3(omgtheta);
+    omgmat = expmat(1:3,1:3) / theta;
+    G = eye(3)*theta+(1-cos(theta))*omgmat+(theta-sin(theta))*omgmat*omgmat;
+    T = [MatrixExp3(expmat(1:3,1:3)),G*expmat(1:3,4)/theta;0,0,0,1];
 end
 end
 

@@ -21,20 +21,8 @@ function  [R,p]= TransToRp(T)
 %     0
 %     0
 %     3
-rt=T(1:3,1:3);
-pt=T(1:3,4);
-[m,n]=size(T);
-if m==4 && n==4
-    if norm(rt'*rt-eye(3))<1e-5 && norm(det(rt)-1)<1e-5
-        R=rt;
-        p=pt;
-    else
-        msg = 'Input is not a transformation matrix.';
-        error(msg);
-    end
-else
-    msg = 'Input Transformation matrix is the wrong size.';
-    error(msg);
-end
+
+R=T(1:3,1:3);
+p=T(1:3,4);
 end
 

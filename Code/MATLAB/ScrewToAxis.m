@@ -11,8 +11,8 @@ function S = ScrewToAxis(q,s,h)
 % Example Input:
 %{
   clear;clc;
-  q = [3,0,0];
-  s = [0,0,1];
+  q = [3;0;0];
+  s = [0;0;1];
   h = 2;
   S = ScrewToAxis(q,s,h)
 %} 
@@ -24,17 +24,7 @@ function S = ScrewToAxis(q,s,h)
 %     0
 %    -3
 %     2
-if length(q)==3 && length(s)==3 && norm(Magnitude(s)-1)<1e-5 
-    v=cross(q,s)+h*s;
-    S=[s(1);s(2);s(3);v(1);v(2);v(3)];
-    if norm(Magnitude(s))>1e-5
-        S=S/Magnitude(s);
-    else
-        S=S/Magnitude(v);
-    end
-else
-    msg = 'Inputs are the wrong size. -->  qE3, sE3, h scaler.';
-    error(msg);
-end
+
+S=[s;cross(q,s)+h*s];
 end
 

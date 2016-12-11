@@ -2,7 +2,7 @@
 %****************************  CHAPTER 3: RIGID-BODY MOTIONS  *********************************
 %**********************************************************************************************
 
-function  R = MatrixExp3(expc3)
+function  R = MatrixExp3(expmat)
 % Takes a 3-vector of exponential coordinates
 % Returns R (SO(3)) that is achieved by rotating about omghat by theta 
 % from an initial orientation R = I
@@ -10,24 +10,22 @@ function  R = MatrixExp3(expc3)
 % Example Input:
 %{
   clear;clc;
-  expc3 = [1,2,3];
-  R = MatrixExp3(expc3)  
+  expmat = [[0, -3, 2]; [3, 0, -1]; [-2, 1, 0]];
+  R = MatrixExp3(expmat)  
 %} 
 % Output:
 % R =
 %   -0.6949    0.7135    0.0893
 %   -0.1920   -0.3038    0.9332
 %    0.6930    0.6313    0.3481
-if length(expc3)==3
-    if norm(expc3)<1e-5
-        R=eye(3);
-    else
-    [omghat,theta]=AxisAng3(expc3);
-    R=eye(3)+sin(theta)*VecToso3(omghat)+(1-cos(theta))*VecToso3(omghat)*VecToso3(omghat);
-    end
+
+omgtheta = so3ToVec(expmat);
+if Nearzero(norm(omgtheta))
+    R = eye(3);
 else
-    msg = 'Input vector is the wrong size.';
-    error(msg);
+    [omghat,theta] = AxisAng3(omgtheta);
+    omgmat = expmat / theta;
+    R=eye(3)+sin(theta)*omgmat+(1-cos(theta))*omgmat*omgmat;
 end
 end
 

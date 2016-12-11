@@ -17,22 +17,12 @@ function [S,theta] = AxisAng6(expc6)
 %     1     0     0     1     2     3
 % theta =
 %     1
-if length(expc6)==6
-    if norm(Magnitude(expc6(1:3)))>1e-5
-        theta=Magnitude(expc6(1:3));
-        S=expc6/theta;
-    else
-        if norm(Magnitude(expc6(4:6)))>1e-5
-        theta=Magnitude(expc6(4:6));
-        S=expc6/theta;
-        else
-            theta=0;
-            S=[0,0,0,0,0,0];    
-        end
-    end        
-else
-    msg = 'Input vector is the wrong size.';
-    error(msg);
+
+theta = norm(expc6(1:3));
+if Nearzero(theta)
+    theta = norm(expc6(4:6));
 end
+S = expc6/theta;      
+
 end
 

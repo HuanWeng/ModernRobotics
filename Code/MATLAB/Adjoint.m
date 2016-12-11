@@ -19,13 +19,8 @@ function AdT = Adjoint(T)
 %     0     0     3     1     0     0
 %     3     0     0     0     0    -1
 %     0     0     0     0     1     0
-[m,n]=size(T);
-if m==4 && n==4
-    [R,p]=TransToRp(T);
-    AdT=[R,zeros(3);VecToso3(p)*R,R];
-else
-    msg = 'Input matrix is the wrong size.';
-    error(msg);
-end
+[R,p]=TransToRp(T);
+AdT=[R,zeros(3);VecToso3(p)*R,R];
+
 end
 

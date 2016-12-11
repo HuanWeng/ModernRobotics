@@ -3,7 +3,8 @@
 %**********************************************************************************************
 
 function norm_v = Normalize(V)
-% Takes in a vector and scales it to a unit vector
+% Takes in a vector.
+% Scales it to a unit vector.
 % Example Input:
 %{
   clear;clc;
@@ -14,6 +15,7 @@ function norm_v = Normalize(V)
 % norm_v =
 %    0.2673    0.5345    0.8018
 
+%{
 [m,n]=size(V);
 mag=Magnitude(V);
 if ((n==1 && m~=0) || (m==1 && n~=0))&& mag~=0 && ~isempty(mag)
@@ -29,6 +31,7 @@ else
     msg = 'Input is not a vector.';
     error(msg);
 end
-
+%}
+norm_v = V / norm(V);
 end
 

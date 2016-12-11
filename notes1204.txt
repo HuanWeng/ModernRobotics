@@ -1,16 +1,16 @@
 Magnitude in all of them seems unnecessary.
 Nearzero: Added to all of them as a basic helper function
 array problem begin at AxisAng3
-Exp: Not sure about if it is necessary to test theta=0, since the algorithm changes. Right now it does not test.
 Rewrite all the log and exp.
 
-at vectose3
+Not quite sure about ScrewToAxis.
 
 Matlab:
 Delete Magnitude and replace it by norm()
 
 
 Mathematica:
+Sometimes no need to add return
 
 
 Python:

@@ -1,3 +1,5 @@
+%*** BASIC HELPER FUNCTIONS ***
+
 function judge = Nearzero(near)
 % Takes a scalar.
 % Checks if the scalar is small enough to be neglected.

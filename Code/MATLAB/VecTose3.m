@@ -1,6 +1,4 @@
-%**********************************************************************************************
-%****************************  CHAPTER 3: RIGID-BODY MOTIONS  *********************************
-%**********************************************************************************************
+%*** CHAPTER 3: RIGID-BODY MOTIONS ***
 
 function se3mat = VecTose3(V)
 % Takes a 6-vector (representing a spatial velocity).
@@ -8,7 +6,7 @@ function se3mat = VecTose3(V)
 % Example Input:
 %{
   clear;clc;
-  V = [1;2;3;4;5;6];
+  V = [1; 2; 3; 4; 5; 6];
   se3mat = VecTose3(V)
 %} 
 % Output:
@@ -17,9 +15,6 @@ function se3mat = VecTose3(V)
 %     3     0    -1     5
 %    -2     1     0     6
 %     0     0     0     0 
-
-so3mat=VecToso3(V(1:3));
-se3mat=[so3mat,V(4:6);zeros(1,4)];
-
+se3mat = [VecToso3(V(1:3)),V(4:6);0, 0, 0, 0];
 end
 

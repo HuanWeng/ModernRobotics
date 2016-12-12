@@ -1,366 +1,289 @@
 '''
-**********************************************************************************************
-Library of functions written to accompany the algorithms described in Modern Robotics:  Mechanics, Planning, and Control.
-**********************************************************************************************
-**********************************************************************************************
-Author: Mikhail Todes
+***************************************************************************
+Library of functions written to accompany the algorithms described in
+Modern Robotics: Mechanics, Planning, and Control.
+***************************************************************************
+Author: Mikhail Todes, Huan Weng
 Email: mikhail@u.northwestern.edu
-Github: https://github.com/MikhailTodes
-Date: November 2015
-**********************************************************************************************
+Github: https://github.com/NxRLab/ModernRobotics
+Date: December 2016
+***************************************************************************
 Language: Python
 Also available in: MATLAB, Mathematica
 Included libraries: numpy, math, matplotlib, random
-**********************************************************************************************
+***************************************************************************
 '''
 
 '''
-**********************************************************************************************
-**************************************  IMPORTS  *********************************************
-**********************************************************************************************
+*** IMPORTS ***
 '''
+
 import numpy as np
 from math import cos, acos, sin, tan, pi, sqrt
 import matplotlib.pyplot as plt
 import random
 
+'''
+*** BASIC HELPER FUNCTIONS ***
+'''
 
-'''
-**********************************************************************************************
-*******************************  BASIC HELPER FUNCTIONS  *************************************
-**********************************************************************************************
-'''
-def matmult(*x):#Returns the dot product of the inputs
+def Nearzero(z):
+#Takes a scalar.
+#Checks if the scalar is small enough to be neglected.
     '''
 Example Input:
-([1,2,3], [3,2,1])
+z = -1e-6
 Output:
-10
+1
     '''
-    try:
-        return reduce(np.dot, x)
-    except:
-        print ("Input vectors are not aligned")
-
-
-def Magnitude(V):#Takes in a vector and returns its length
-    '''
-Example Input: 
-V = [1,2,3]
-Output:
-3.74165738677
-    '''
-    try:
-        length = 0
-        for i in range(len(V)):
-            length += (V[i]**2)
-        return ((length)**0.5)
-    except:
-        print ("Input is not a vector")
-
-
-def Normalize(V):#Takes in a vector and scales it to a unit vector
+    if abs(z) < 1e-5:
+	return True
+    else:
+	return False
+       
+def Normalize(V):
+#Takes a vector.
+#Scales it to a unit vector.
     '''
 Example Input: 
 V = [1,2,3]
 Output:
 [0.2672612419124244, 0.5345224838248488, 0.8017837257372732]
     '''
-    try:
-        length = Magnitude(V)
-        if (abs(length) < 1e-5):
-            for i in range(len(V)):
-                V[i] = 0.0
-            return V
-        for i in range(len(V)):
-            V[i] = V[i]/length
-        return V
-    except:
-        print ("Input is not a vector")
-
-
-def det(R):#Takes a square matrix and returns its determinant
-    '''
-Example Input: 
-R = [[0, 0,1],
-    [1, 0, 0],
-    [0, 1, 0]]
-Output:
-1.0
-    '''
-    try:
-        return np.linalg.det(R)
-    except:
-        print("Matrix is not square")
-
-
+    return V / np.linalg.norm(V)
 
 '''
-**********************************************************************************************
-****************************  CHAPTER 3: RIGID-BODY MOTIONS  *********************************
-**********************************************************************************************
+*** CHAPTER 3: RIGID-BODY MOTIONS ***
 '''
-def RotInv(R):#Takes a 3x3 rotation matrix and returns the transpose (inverse)
+
+def RotInv(R):
+#Takes a 3x3 rotation matrix.
+#Returns the inverse (transpose).
     '''
 Example Input: 
-R = [[0, 0,1],
-    [1, 0, 0],
-    [0, 1, 0]]
+R = [[0, 0, 1],
+     [1, 0, 0],
+     [0, 1, 0]]
 Output:
 [[0, 1, 0], 
-[0, 0, 1],
-[1, 0, 0]]
+ [0, 0, 1],
+ [1, 0, 0]]
     '''
-    try:
-        #Test for determinant = 1 +- 0.05 error
-        if (abs(det(R) - 1) < 1e-5):
-            invR = [[R[0][0],R[1][0],R[2][0]],[R[0][1],R[1][1],R[2][1]],[R[0][2],R[1][2],R[2][2]]]
-        else:
-            print ("Determinant of the input matrix does not equal 1")
-        if (np.linalg.norm(matmult(R,invR) - np.eye(3)) - 1 < 1e-5):#Test to make sure R*invR=I 
-            return invR
-    except:
-        print("Inverse cannot be calculated")
+    return np.array(R).T
 
-
-def VecToso3(omg):#Takes a 3-vector(angular velocity).
+def VecToso3(omg):
+#Takes a 3-vector (angular velocity).
 #Returns the skew symmetric matrix in so3.
     '''
 Example Input: 
 omg = [1,2,3]
 Output:
-[[0, -3, 2],
- [3, 0, -1],
- [-2, 1, 0]]
+[[ 0, -3,  2],
+ [ 3,  0, -1],
+ [-2,  1,  0]]
     '''
-    if (len(omg)==3):
-        return [[0,-omg[2],omg[1]], [omg[2],0,-omg[0]], [-omg[1],omg[0],0]]
-    else:
-        print ("Input vector is the wrong size")
+    return [[0,      -omg[2],  omg[1]], 
+	    [omg[2],       0, -omg[0]], 
+	    [-omg[1], omg[0],       0]]
 
 
-def so3ToVec(so3mat):#Takes a 3x3 skew-symmetric matrix (an element of so(3)).
+def so3ToVec(so3mat):
+#Takes a 3x3 skew-symmetric matrix (an element of so(3)).
 #Returns the corresponding vector (angular velocity).
     '''
 Example Input: 
-so3mat = [[0, -3, 2],
- [3, 0, -1],
- [-2, 1, 0]]
+so3mat = [[ 0, -3,  2],
+          [ 3,  0, -1],
+          [-2,  1,  0]]
 Output:
 [1, 2, 3]
     '''
-    try:
-        if (abs(so3mat[0][0]) < 1e-5 and abs(so3mat[1][1]) < 1e-5 and abs(so3mat[2][2]) < 1e-5 and
-        abs(so3mat[0][1] + so3mat[1][0]) < 1e-5 and
-        abs(so3mat[2][0] + so3mat[0][2]) < 1e-5 and 
-        abs(so3mat[1][2] + so3mat[2][1]) < 1e-5):#Check if input is a skew-symmetric matrix
-                return [so3mat[2][1],so3mat[0][2],so3mat[1][0]] #omg
-        else:
-            print ("Input is not a skew-symmetric matrix")
-    except:
-        print ("Input martix is the wrong shape")
+    return [so3mat[2][1], so3mat[0][2], so3mat[1][0]]
 
 
-def AxisAng3(expc3):#Takes A 3-vector of exponential coordinates for rotation.
-#Returns unit rotation axis omghat and the corresponding rotation angle theta.
+def AxisAng3(expc3):
+#Takes A 3-vector of exponential coordinates for rotation.
+#Returns unit rotation axis omghat and the corresponding rotation angle
+#theta.
     '''
 Example Input: 
 expc3 = [1,2,3]
 Output:
-([0.2672612419124244, 0.5345224838248488, 0.8017837257372732], -->unit rotation axis omghat
- 3.7416573867739413) -->rotation angle theta
+([0.2672612419124244, 0.5345224838248488, 0.8017837257372732],
+ 3.7416573867739413) 
     '''
-    if (len(expc3)==3):
-        theta = Magnitude(expc3)
-        if (abs(theta) < 1e-5):
-            return ([0,0,0],0)
-        else:
-            return (Normalize(expc3), theta)#(omghat, theta)
-    else:
-        print ("Input vector is the wrong size")
+    return (Normalize(expc3), np.linalg.norm(expc3))
 
-    
-def MatrixExp3(expc3):#Takes a 3-vector of exponential coordinates.
-#Returns R (SO(3)) that is achieved by rotating about omghat by theta
-#from an initial orientation R = I
+def MatrixExp3(expmat):
+#Takes a 3-vector of exponential coordinates.
+#Returns R in SO(3) that is achieved by rotating about omghat by theta from
+#an initial orientation R = I
 #Rodriguez R = I + sin(theta)*omghat + (1-cos(theta))*omghat^2
     '''
 Example Input: 
-expc3 = [1,2,3]
+expmat = [[ 0, -3,  2],
+	  [ 3,  0, -1],
+          [-2,  1,  0]]
 Output:
 [[-0.69492056,  0.71352099,  0.08929286],
-[-0.19200697, -0.30378504,  0.93319235],
-[ 0.69297817,  0.6313497 ,  0.34810748]]
+ [-0.19200697, -0.30378504,  0.93319235],
+ [ 0.69297817,  0.6313497 ,  0.34810748]]
     '''
-    if (len(expc3)==3):
-        omghat,theta = AxisAng3(expc3)
-        return np.eye(3) + matmult(VecToso3(omghat),np.sin(theta)) + matmult(VecToso3(omghat),VecToso3(omghat))*(1-np.cos(theta))        
+    omgtheta = so3ToVec(expmat)
+    if Nearzero(np.linalg.norm(omgtheta)):
+        return np.eye(3)
     else:
-        print ("Input vector is the wrong size")
+        theta = AxisAng3(omgtheta)[1]
+        omgmat = expmat / theta
+        term3 = (1 - np.cos(theta)) * np.dot(omgmat,omgmat)
+        return np.eye(3) + np.sin(theta) * omgmat + term3
 
-
-def MatrixLog3(R):#Takes R (rotation matrix).
-#Returns the corresponding 3-vector of exponential coordinates (expc3 = omghat*theta).
+def MatrixLog3(R):
+#Takes R (rotation matrix).
+#Returns the corresponding 3-vector of exponential coordinates 
+#(expc3 = omghat*theta).
     '''
 Example Input: 
-R = [[0, 0, 1],[1, 0, 0],[0, 1, 0]]
-
+R = [[0, 0, 1],
+     [1, 0, 0],
+     [0, 1, 0]]
 Output:
-[1.2091995761561456, 1.2091995761561456, 1.2091995761561456]
+[[          0, -1.20919958,  1.20919958],
+ [ 1.20919958,           0, -1.20919958],
+ [-1.20919958,  1.20919958,           0]]
     '''
-    if (np.shape(R)==(3,3)):
-        try:
-            Rtrace = R[0][0]+R[1][1]+R[2][2]
-	    acosinput = (Rtrace - 1)/2.0
-	    if acosinput > 1:
-		acosinput = 1
-	    if acosinput < -1:
-		acosinput = -1	
-            theta = np.arccos(acosinput)
-            omg = 1/(2*np.sin(theta))*np.array([R[2][1]-R[1][2], R[0][2]-R[2][0], R[1][0]-R[0][1]])
-            if any(map(np.isinf, omg)) or any(map(np.isnan, omg)):
-                theta = 0
-                omg = 3*[1/np.sqrt(3)]
-            return [omg[0]*theta,omg[1]*theta,omg[2]*theta]
-        except:
-            print("Matrix cannot be converted")        
+    if Nearzero(np.linalg.norm(R - np.eye(3))):
+        return np.zeros(3,3)
+    elif Nearzero(np.trace(R) + 1):
+        if not Nearzero(1 + R[2][2]):
+            termvec = np.array([R[0][2], R[1][2], 1 + R[2][2]])
+            omg = (1.0 / sqrt(2 * (1 + R[2][2]))) * termvec
+        elif not Nearzero(1 + R[1][1]):
+            termvec = np.array([R[0][1], 1 + R[1][1], R[2][1]])
+            omg = (1.0 / sqrt(2 * (1 + R[1][1]))) * termvec
+        else:
+            termvec = np.array([1 + R[0][0], R[1][0], R[2][0]])
+            omg = (1.0 / sqrt(2 * (1 + R[0][0]))) * termvec
+        return VecToso3(pi*omg)
     else:
-        print ("Input matrix is the wrong size")
+        acosinput = (np.trace(R) - 1) / 2.0
+        if acosinput > 1:
+            acosinput = 1
+	elif acosinput < -1:
+            acosinput = -1		
+        theta = acos(acosinput)
+        return theta / 2.0 / sin(theta) * (R - np.array(R).T)
 
-
-def RpToTrans (R,p):#Takes rotation matrix R and position p. 
+def RpToTrans (R,p):
+#Takes rotation matrix R and position p. 
 #Returns corresponding homogeneous transformation matrix T SE(3)
     '''
 Example Input: 
-R = [[1, 0, 0], [0, 0, -1], [0, 1, 0]]
-p = [1,2,5]
+R = [[1, 0,  0], 
+     [0, 0, -1], 
+     [0, 1,  0]]
+p = [1, 2, 5]
 Output:
-[[1, 0, 0, 1],
+[[1, 0,  0, 1],
  [0, 0, -1, 2],
- [0, 1, 0, 5],
- [0, 0, 0, 1]]
+ [0, 1,  0, 5],
+ [0, 0,  0, 1]]
     '''
-    if (len(p)==3 and np.shape(R)==(3,3)):
-        #Test for determinant = 1 +- 0.05 error
-        if (abs(det(R) - 1) < 1e-5):
-            return [ [R[0][0],R[0][1],R[0][2],p[0]] , [R[1][0],R[1][1],R[1][2],p[1]], [R[2][0],R[2][1],R[2][2],p[2]] , [0,0,0,1]]
-        print ("Input R is not a rotation matrix")
-    else:
-        print ("Input rotation matrix or position vector are the wrong size")
+    return np.r_[np.c_[R,p],[[0, 0, 0, 1]]]    
 
 
-def TransToRp (T):#Takes transformation matrix T SE(3). 
+def TransToRp (T):
+#Takes transformation matrix T SE(3). 
 #Returns R the corresponding rotation matrix,
 #p the corresponding position vector.
     '''
 Example Input: 
-T = [[1,0,0,0],
-     [0,0,-1,0],
-     [0,1,0,3],
-     [0,0,0,1]]
+T = [[1, 0,  0, 0],
+     [0, 0, -1, 0],
+     [0, 1,  0, 3],
+     [0, 0,  0, 1]]
 Output:
-([[1, 0, 0], -->R
- [0, 0, -1], -->R
- [0, 1, 0]], -->R 
-[0, 0, 3]) -->P
+([[1, 0,  0], 
+  [0, 0, -1], 
+  [0, 1,  0]],  
+[0, 0, 3])
     '''
-    if (np.shape(T)==(4,4)):
-        R = [[T[0][0],T[0][1],T[0][2]],
-                  [T[1][0],T[1][1],T[1][2]],
-                  [T[2][0],T[2][1],T[2][2]]]
-        p = [T[0][3],T[1][3],T[2][3]]
-        if (abs(det(R)*1.0-1)<1e-5):
-            return R,p
-        print ("Input is not a transformation matrix")
-    else:
-        print ("Input Transformation matrix is the wrong size")
+    R = [[T[0][0], T[0][1], T[0][2]],
+         [T[1][0], T[1][1], T[1][2]],
+         [T[2][0], T[2][1], T[2][2]]]
+    return R, [T[0][3], T[1][3], T[2][3]]
 
-
-def TransInv(T):#Takes T a transformation matrix. 
+def TransInv(T):
+#Takes T a transformation matrix. 
 #Returns its inverse.
-#Uses the structure of transformation matrices to avoid taking a matrix inverse, for efficiency.
+#Uses the structure of transformation matrices to avoid taking a matrix
+#inverse, for efficiency.
     '''
 Example Input: 
-T = [[1,0,0,0],
-     [0,0,-1,0],
-     [0,1,0,3],
-     [0,0,0,1]]
+T = [[1, 0,  0, 0],
+     [0, 0, -1, 0],
+     [0, 1,  0, 3],
+     [0, 0,  0, 1]]
 Output:
-[[1, 0, 0, 0],
- [0, 0, 1, -3],
- [0, -1, 0, 0],
- [0, 0, 0, 1]]
+[[1,  0, 0,  0],
+ [0,  0, 1, -3],
+ [0, -1, 0,  0],
+ [0,  0, 0,  1]]
     '''
-    try:
-        R,p = TransToRp(T)
-        Rt = RotInv(R)
-        pt = np.dot(Rt, p)
-        return [ [Rt[0][0],Rt[0][1],Rt[0][2],-pt[0]],
-                 [Rt[1][0],Rt[1][1],Rt[1][2],-pt[1]],
-                 [Rt[2][0],Rt[2][1],Rt[2][2],-pt[2]],
-                 [0,0,0,1]]
-    except:
-        print ("Input matrix is not an element of SE3")
-
-
-def VecTose3(V):#Takes a 6-vector (representing a spatial velocity). 
+    R,p = TransToRp(T)
+    Rt = np.array(R).T
+    return np.r_[np.c_[Rt,-np.dot(Rt, p)],[[0, 0, 0, 1]]]
+    
+def VecTose3(V):
+#Takes a 6-vector (representing a spatial velocity). 
 #Returns the corresponding 4x4 se(3) matrix.
     '''
 Example Input: 
-V = [1,2,3,4,5,6]
+V = [1, 2, 3, 4, 5, 6]
 Output:
-[[0, -3, 2, 4], [3, 0, -1, 5], [-2, 1, 0, 6], [0, 0, 0, 0]]
+[[ 0, -3,  2, 4], 
+ [ 3,  0, -1, 5], 
+ [-2,  1,  0, 6], 
+ [ 0,  0,  0, 0]]
     '''
-    if (len(V)==6):
-        so3mat = VecToso3([V[0],V[1],V[2]])
-        return [ [so3mat[0][0],so3mat[0][1],so3mat[0][2],V[3]] , [so3mat[1][0],so3mat[1][1],so3mat[1][2],V[4]], [so3mat[2][0],so3mat[2][1],so3mat[2][2],V[5]] , [0,0,0,0]]
-    else:
-        print ("Input vector is the wrong size")
+    so3mat = VecToso3([V[0], V[1], V[2]])
+    return np.r_[np.c_[so3mat,[V[3], V[4], V[5]]],np.zeros((1,4))]
 
-
-def se3ToVec(se3mat):#Takes se3mat a 4x4 se(3) matrix.
+def se3ToVec(se3mat):
+#Takes se3mat a 4x4 se(3) matrix.
 #Returns the corresponding 6-vector (representing spatial velocity).
     '''
 Example Input: 
-se3mat = [[0, -3, 2, 4], [3, 0, -1, 5], [-2, 1, 0, 6], [0, 0, 0, 0]]
+se3mat = [[ 0, -3,  2, 4], 
+          [ 3,  0, -1, 5], 
+          [-2,  1,  0, 6], 
+          [ 0,  0,  0, 0]]
 Output:
 [1, 2, 3, 4, 5, 6]
     '''
-    try:
-        if (np.shape(se3mat)==(4,4)):
-            return ([se3mat[2][1],se3mat[0][2],se3mat[1][0],
-                 se3mat[0][3],se3mat[1][3],se3mat[2][3]])
-        print ("Input matrix is the wrong size")
-    except:
-        print ("Input is not an element of se3")
+    omg = [se3mat[2][1], se3mat[0][2], se3mat[1][0]]
+    return np.r_[omg,[se3mat[0][3], se3mat[1][3], se3mat[2][3]]]
 
 
-def Adjoint(T):#Takes T a transformation matrix SE3 
+def Adjoint(T):
+#Takes T a transformation matrix SE3 
 #Returns the corresponding 6x6 adjoint representation [AdT]
     '''
 Example Input: 
-T = [[1,0,0,0], [0,0,-1,0], [0,1,0,3], [0,0,0,1]]
+T = [[1, 0,  0, 0], 
+     [0, 0, -1, 0], 
+     [0, 1,  0, 3], 
+     [0, 0,  0, 1]]
 Output:
-[[1, 0, 0, 0, 0, 0],
- [0, 0, -1, 0, 0, 0],
- [0, 1, 0, 0, 0, 0],
- [0, 0, 3, 1, 0, 0],
- [3, 0, 0, 0, 0, -1],
- [0, 0, 0, 0, 1, 0]]
+[[1, 0,  0, 0, 0,  0],
+ [0, 0, -1, 0, 0,  0],
+ [0, 1,  0, 0, 0,  0],
+ [0, 0,  3, 1, 0,  0],
+ [3, 0,  0, 0, 0, -1],
+ [0, 0,  0, 0, 1,  0]]
     '''
-    try:
-        R,p = TransToRp(T)
-        pp = VecToso3(p)
-        Rt = matmult(pp,R) 
-        return [[R[0][0],R[0][1],R[0][2],0,0,0],
-                [R[1][0],R[1][1],R[1][2],0,0,0],
-                 [R[2][0],R[2][1],R[2][2],0,0,0],
-                  [Rt[0][0],Rt[0][1],Rt[0][2],R[0][0],R[0][1],R[0][2]],
-                  [Rt[1][0],Rt[1][1],Rt[1][2],R[1][0],R[1][1],R[1][2]],
-                  [Rt[2][0],Rt[2][1],Rt[2][2],R[2][0],R[2][1],R[2][2]]]
-    except:
-        print ("Input matrix is the wrong size")
-
+    R,p = TransToRp(T)
+    return np.r_[np.c_[R,np.zeros((3,3))],np.c_[np.dot(VecToso3(p),R),R]]
 
 def ScrewToAxis(q,s,h):
 #Takes q: a point lying on the screw axis, 
@@ -369,78 +292,59 @@ def ScrewToAxis(q,s,h):
 #Returns the corresponding normalized screw axis.
     '''
 Example Input: 
-q = [3,0,0]
-s = [0,0,1]
+q = [3, 0, 0]
+s = [0, 0, 1]
 h = 2
 Output:
-[[0], [0], [1], [0], [-3], [2]]
+[0, 0, 1, 0, -3, 2]
     '''
-    if(len(q)==3 and len(s)==3 and isinstance(h, int)):
-        sq=np.cross(s,q)
-        return [[s[0]],
-                [s[1]],
-                [s[2]],
-                [(-sq[0]+h*s[0])],
-                [(-sq[1]+h*s[1])],
-                [(-sq[2]+h*s[2])]]
-    else:
-        print("Inputs are the wrong size. -->  qE3, sE3, h scaler")
+    return np.r_[s,np.cross(q,s) + np.dot(h,s)]
 
-
-def AxisAng6(expc6):#Takes a 6-vector of exponential coordinates for rigid-body motion S*theta.
+def AxisAng6(expc6):
+#Takes a 6-vector of exponential coordinates for rigid-body motion S*theta.
 #Returns S: the corresponding normalized screw axis,
 #theta: the distance traveled along/about S.
     '''
 Example Input: 
-expc6 = [1,0,0,1,2,3]
+expc6 = [1, 0, 0, 1, 2, 3]
 Output:
-([1.0, 0.0, 0.0, 1.0, 2.0, 3.0], 1.0) --> First the srew axis and then the theta
+([1.0, 0.0, 0.0, 1.0, 2.0, 3.0], 
+1.0)
     '''
-    if (len(expc6)==6):
-        theta = Magnitude([expc6[0],expc6[1],expc6[2]])
-        if (abs(theta) < 1e-5):
-            theta = Magnitude([expc6[3],expc6[4],expc6[5]])
-            if (abs(theta) < 1e-5):
-                return ([0,0,0,0,0,0],0)
-            return ([expc6[0]/theta*1.0,expc6[1]/theta*1.0,expc6[2]/theta*1.0,
-                     expc6[3]/theta*1.0,expc6[4]/theta*1.0,expc6[5]/theta*1.0],
-                    theta)#(S,theta)
-        else:
-            return ([expc6[0]/theta*1.0,expc6[1]/theta*1.0,expc6[2]/theta*1.0,
-                     expc6[3]/theta*1.0,expc6[4]/theta*1.0,expc6[5]/theta*1.0],
-                    theta)#(S,theta)
-    else:
-        print ("Input vector is the wrong size")
+    theta = np.linalg.norm([expc6[0], expc6[1], expc6[2]])
+    if Nearzero(theta):
+        theta = np.linalg.norm([expc6[3], expc6[4], expc6[5]])
+    return (expc6 / theta,theta)
 
-
-def MatrixExp6(expc6):#Takes a 6-vector of exponential coordinates (S*theta) 
-#Returns a T matrix SE(3) that is achieved by traveling along/about the screw axis S
-#for a distance theta from an initial configuration T = I
+def MatrixExp6(expmat):
+#Takes a 6-vector of exponential coordinates (S*theta) 
+#Returns a T matrix SE(3) that is achieved by traveling along/about the
+#screw axis S for a distance theta from an initial configuration T = I
 #Rodriguez R = I + sin(theta)*omg + (1-cos(theta))*omg^2
     '''
 Example Input: 
-expc6 = [1.5707963267948966, 0.0, 0.0, 0.0, 2.3561944901923448, 2.3561944901923457]
+expmat = [[0,          0,           0,          0],
+          [0,          0, -1.57079633, 2.35619449],
+          [0, 1.57079633,           0, 2.35619449],
+          [0,          0,           0,          0]]
 Output:
-[[1.0, 0.0, 0.0, 0.0],
+[[1.0, 0.0,  0.0, 0.0],
  [0.0, 0.0, -1.0, 0.0],
- [0.0, 1.0, 0.0, 3.0],
- [0, 0, 0, 1]]
-
-    '''
-    S,theta = AxisAng6(expc6)
-    omg = [S[0],S[1],S[2]]
-    if (Magnitude([expc6[0],expc6[1],expc6[2]])>1e-5):
-        UL = np.eye(3) + matmult(VecToso3(omg),np.sin(theta)) + matmult(VecToso3(omg),VecToso3(omg))*(1-np.cos(theta))
-        UR = matmult(np.eye(3),theta) + matmult(VecToso3(omg),(1-np.cos(theta))) + matmult(VecToso3(omg),VecToso3(omg))*(theta-np.sin(theta))
-        UR = np.dot(UR,[S[3],S[4],S[5]])
+ [0.0, 1.0,  0.0, 3.0],
+ [  0,   0,    0,   1]]
+    '''  
+    omgtheta = so3ToVec(np.array(expmat)[0:3:1,0:3:1])
+    if Nearzero(np.linalg.norm(omgtheta)):
+        termv = [expmat[0][3],expmat[1][3],expmat[2][3]]
+        return np.r_[np.c_[np.eye(3),termv],[[0, 0, 0, 1]]]
     else:
-        UL = np.eye(3)
-        UR = [expc6[3],expc6[4],expc6[5]]
-    return [[UL[0][0],UL[0][1],UL[0][2],UR[0]],
-            [UL[1][0],UL[1][1],UL[1][2],UR[1]],
-             [UL[2][0],UL[2][1],UL[2][2],UR[2]],
-              [0,0,0,1]]
-
+        theta = AxisAng3(omgtheta)[1]
+        omgmat = np.array(expmat)[0:3:1,0:3:1] / theta
+        term3 = (theta - np.sin(theta)) * np.dot(omgmat,omgmat)
+        G = np.eye(3) * theta + (1 - np.cos(theta)) * omgmat + term3
+        termw = MatrixExp3(np.array(expmat)[0:3:1,0:3:1])
+        termvtheta = np.dot(G,[expmat[0][3], expmat[1][3], expmat[2][3]])
+        return np.r_[np.c_[termw,termvtheta / theta],[[0, 0, 0, 1]]]
 
 def MatrixLog6(T):#Takes a transformation matrix T SE(3) 
 #Returns the corresponding 6-vector of exponential coordinates S*theta
@@ -802,7 +706,7 @@ Output:
     '''
     #******INITIALISATION********
     n=len(Mlist)
-    Mi = [Mlist[0]]
+    Mi = Mlist[0]
     Ai = [matmult(Adjoint(TransInv(Mi[0])),Slist[0])]
     Ti = [matmult(Mlist[0],MatrixExp6(matmult(Ai[0],thetalist[0])))]
     Vi=[]
@@ -812,8 +716,8 @@ Output:
     #****************************
     #*****Forward Iteration******
     for i in range (1,n):
-        Mi.append(matmult(Mi[i-1],Mlist[i]))
-        Ai.append(matmult(Adjoint(TransInv(Mi[i])),Slist[i]))
+        Mi = matmult(Mi[i-1],Mlist[i])
+        Ai.append(matmult(Adjoint(TransInv(Mi)),Slist[i]))
         Ti.append(matmult(Mlist[i],MatrixExp6(matmult(Ai[i],thetalist[i]))))
         Vi.append(matmult(Adjoint(TransInv(Ti[i])),Vi[i-1])+matmult(Ai[i],dthetalist[i]))
         Vdi.append(matmult(Adjoint(TransInv(Ti[i])),Vdi[i-1])+matmult(matmult(ad(Vi[i]),Ai[i]),dthetalist[i])+matmult(Ai[i],ddthetalist[i]))
@@ -821,14 +725,17 @@ Output:
    
     #******INITIALISATION********
     Fi =[[None]]*(n)
-    Fi[n-1] = matmult(np.array(Adjoint(TransInv(Ti[n-1]))).T,Ftip)+matmult(Glist[n-1],Vdi[n-1])-matmult(np.array(ad(Vi[n-1])).T,matmult(Vi[n-1],Glist[n-1]))
+#    Fi[n-1] = matmult(np.array(Adjoint(TransInv(Mi[n]))).T,Ftip)+matmult(Glist[n-1],Vdi[n-1])-matmult(np.array(ad(Vi[n-1])).T,matmult(Vi[n-1],Glist[n-1]))
+    Fi[n-1] = np.array(matmult(np.array(Adjoint(TransInv(Mi[n]))).T,np.array(Ftip).T) + matmult(Glist[n-1],np.array(Vdi[n-1]).T) - matmult(np.array(ad(Vi[n-1])).T,matmult(Glist[n-1],np.array(Vi[n-1]).T))).T
     taulist = [[None]]*(n)
-    taulist[n-1]=matmult(np.array(Fi[n-1]).T,Ai[n-1])
+    taulist[n-1]=matmult(Fi[n-1],np.array(Ai[n-1]).T)
     #****************************
     #*****Backward Iteration*****
     for i in range (n,1,-1):
-        Fi[i-2] = matmult(np.array(Adjoint(TransInv(Ti[i-2]))).T,Ftip)+matmult(Glist[i-2],Vdi[i-2])-matmult(np.array(ad(Vi[i-2])).T,matmult(Vi[i-2],Glist[i-2]))
-        taulist[i-2]=matmult(np.array(Fi[i-2]).T,Ai[i-2])
+#        Fi[i-2] = matmult(np.array(Adjoint(TransInv(Ti[i-2]))).T,Ftip)+matmult(Glist[i-2],Vdi[i-2])-matmult(np.array(ad(Vi[i-2])).T,matmult(Vi[i-2],Glist[i-2]))
+	Fi[i-2] = np.array(matmult(np.array(Adjoint(TransInv(Ti[i-2]))).T,np.array(F[i-1]).T) + matmult(Glist[i-2],np.array(Vdi[i-2]).T) - matmult(np.array(ad(Vi[i-2])).T,matmult(Glist[i-2],np.array(Vi[i-2]).T))).T
+#        taulist[i-2]=matmult(np.array(Fi[i-2]).T,Ai[i-2])
+	taulist[i-2]=matmult(Fi[i-2],np.array(Ai[i-2]).T)
     #****************************
 
     return taulist
@@ -878,7 +785,7 @@ Output:
         ddthetalist = [0]*n
         ddthetalist[i]=1
         M.append(InverseDynamics(thetalist, dthetalist, ddthetalist, g, Ftip, Mlist, Glist, Slist))
-    
+    M = np.array(M).T
     return M
 
 

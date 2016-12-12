@@ -1,6 +1,4 @@
-%**********************************************************************************************
-%****************************  CHAPTER 3: RIGID-BODY MOTIONS  *********************************
-%**********************************************************************************************
+%*** CHAPTER 3: RIGID-BODY MOTIONS ***
 
 function invR = RotInv(R)
 % Takes a 3x3 rotation matrix.
@@ -8,7 +6,7 @@ function invR = RotInv(R)
 % Example Input:
 %{ 
   clear;clc;
-  R = [0, 0,1;1, 0, 0; 0, 1, 0];
+  R = [0, 0, 1; 1, 0, 0; 0, 1, 0];
   invR = RotInv(R)
 %} 
 % Output:
@@ -16,5 +14,5 @@ function invR = RotInv(R)
 %     0     1     0
 %     0     0     1
 %     1     0     0
-invR=R';
+invR = R';
 end

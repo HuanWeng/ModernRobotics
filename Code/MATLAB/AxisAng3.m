@@ -1,6 +1,4 @@
-%**********************************************************************************************
-%****************************  CHAPTER 3: RIGID-BODY MOTIONS  *********************************
-%**********************************************************************************************
+%*** CHAPTER 3: RIGID-BODY MOTIONS ***
 
 function [omghat,theta] = AxisAng3(expc3)
 % Takes A 3-vector of exponential coordinates for rotation and
@@ -8,15 +6,17 @@ function [omghat,theta] = AxisAng3(expc3)
 % Example Input:
 %{
   clear;clc;
-  expc3 = [1,2,3];
+  expc3 = [1; 2; 3];
   [omghat,theta] = AxisAng3(expc3)  
 %}
 % Output:
 % omghat =
-%    0.2673    0.5345    0.8018
+%    0.2673
+%    0.5345
+%    0.8018
 % theta =
 %    3.7417
-    theta=norm(expc3);
-    omghat=expc3/theta;
+theta = norm(expc3);
+omghat = expc3 / theta;
 end
 

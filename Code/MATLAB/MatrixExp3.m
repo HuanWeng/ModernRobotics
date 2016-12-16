@@ -20,7 +20,7 @@ omgtheta = so3ToVec(expmat);
 if Nearzero(norm(omgtheta))
     R = eye(3);
 else
-    [omghat,theta] = AxisAng3(omgtheta);
+    [omghat, theta] = AxisAng3(omgtheta);
     omgmat = expmat / theta;
     R = eye(3) + sin(theta) * omgmat + (1 - cos(theta)) * omgmat * omgmat;
 end

@@ -17,7 +17,7 @@ function AdT = Adjoint(T)
 %     0     0     3     1     0     0
 %     3     0     0     0     0    -1
 %     0     0     0     0     1     0
-[R,p] = TransToRp(T);
+[R, p] = TransToRp(T);
 AdT = [R, zeros(3); VecToso3(p) * R, R];
 end
 

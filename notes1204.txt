@@ -22,3 +22,14 @@ The introductions including the examples of all Log and Exp should be changed.
 
 Book typos:
 P114: MatrixLog6(T) misses 6
+P106: Algorithm descriptions differ in (b) and (c)
+
+
+
+How to change lines: 
+Matlab:  xxxxxxxxxxxxxxxx...,
+
+
+What if output is nearzero? right now it is ignored without any explanation
+
+Python: (xxxxxxxxxxxxxx)           XXXXXXXXXXX\

@@ -1,6 +1,4 @@
-%**************************************************************************
-%****************************  CHAPTER 3: RIGID-BODY MOTIONS  *************
-%**************************************************************************
+%*** CHAPTER 3: RIGID-BODY MOTIONS ***
 
 function expmat = MatrixLog6(T)
 % Takes a transformation matrix T SE(3)
@@ -13,34 +11,26 @@ function expmat = MatrixLog6(T)
 %} 
 % Output:
 % expc6 =
-%    1.5708
-%         0
-%         0
-%         0
-%    2.3562
-%    2.3562
-
-[R,p]=TransToRp(T);
-if Nearzero(norm(R-eye(3)))
-    expmat = [zeros(3),T(1:3,4);0,0,0,1];
-    
-    
-    elseif norm(R(1,1)+R(2,2)+R(3,3)+1)<1e-5
-        theta=pi;
-        omg=MatrixLog3(R);
-        v=(eye(3)/theta-0.5*VecToso3(omg)+(1/theta-0.5*cot(theta/2))*VecToso3(omg)*VecToso3(omg))*p;
-    else
-        acosinput = (R(1,1)+R(2,2)+R(3,3)-1)/2;
-        if acosinput > 1
-            acosinput = 1;
-        elseif acosinput < -1
-            acosinput = -1;
-        end
-        theta=acos(acosinput);
-        w1=1/(2*sin(theta))*(R-R');
-        omg=so3ToVec(w1);
-        v=(eye(3)/theta-0.5*VecToso3(omg)+(1/theta-0.5*cot(theta/2))*VecToso3(omg)*VecToso3(omg))*p;
-    end
-    expmat=theta*[omg;v];
+%         0         0         0         0
+%         0         0   -1.5708    2.3562
+%         0    1.5708         0    2.3562
+%         0         0         0         0
+[R, p] = TransToRp(T);
+if Nearzero(norm(R - eye(3)))
+    expmat = [zeros(3), T(1:3,4); 0, 0, 0, 0];
+else
+	acosinput = (trace(R) - 1) / 2;
+	if acosinput > 1
+        acosinput = 1;
+    elseif acosinput < -1
+        acosinput = -1;
+	end
+    theta = acos(acosinput);
+    omgmat = MatrixLog3(R);
+    expmat = [ omgmat, (eye(3) - omgmat / 2 ...
+                        + (1 / theta - cot(theta / 2) / 2) ...
+                          * omgmat * omgmat / theta) * p;
+              0, 0, 0,                                 0];
+end
 end
 

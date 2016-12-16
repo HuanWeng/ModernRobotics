@@ -46,7 +46,7 @@ def Normalize(V):
 #Scales it to a unit vector.
     '''
 Example Input: 
-V = [1,2,3]
+V = [1, 2, 3]
 Output:
 [0.2672612419124244, 0.5345224838248488, 0.8017837257372732]
     '''
@@ -76,7 +76,7 @@ def VecToso3(omg):
 #Returns the skew symmetric matrix in so3.
     '''
 Example Input: 
-omg = [1,2,3]
+omg = [1, 2, 3]
 Output:
 [[ 0, -3,  2],
  [ 3,  0, -1],
@@ -107,7 +107,7 @@ def AxisAng3(expc3):
 #theta.
     '''
 Example Input: 
-expc3 = [1,2,3]
+expc3 = [1, 2, 3]
 Output:
 ([0.2672612419124244, 0.5345224838248488, 0.8017837257372732],
  3.7416573867739413) 
@@ -135,8 +135,8 @@ Output:
     else:
         theta = AxisAng3(omgtheta)[1]
         omgmat = expmat / theta
-        term3 = (1 - np.cos(theta)) * np.dot(omgmat,omgmat)
-        return np.eye(3) + np.sin(theta) * omgmat + term3
+        return np.eye(3) + np.sin(theta) * omgmat \
+               + (1 - np.cos(theta)) * np.dot(omgmat,omgmat)
 
 def MatrixLog3(R):
 #Takes R (rotation matrix).
@@ -156,14 +156,14 @@ Output:
         return np.zeros(3,3)
     elif Nearzero(np.trace(R) + 1):
         if not Nearzero(1 + R[2][2]):
-            termvec = np.array([R[0][2], R[1][2], 1 + R[2][2]])
-            omg = (1.0 / sqrt(2 * (1 + R[2][2]))) * termvec
-        elif not Nearzero(1 + R[1][1]):
-            termvec = np.array([R[0][1], 1 + R[1][1], R[2][1]])
-            omg = (1.0 / sqrt(2 * (1 + R[1][1]))) * termvec
+            omg = (1.0 / sqrt(2 * (1 + R[2][2]))) \
+                  * np.array([R[0][2], R[1][2], 1 + R[2][2]])
+        elif not Nearzero(1 + R[1][1]): 
+            omg = (1.0 / sqrt(2 * (1 + R[1][1]))) \
+                  * np.array([R[0][1], 1 + R[1][1], R[2][1]])
         else:
-            termvec = np.array([1 + R[0][0], R[1][0], R[2][0]])
-            omg = (1.0 / sqrt(2 * (1 + R[0][0]))) * termvec
+            omg = (1.0 / sqrt(2 * (1 + R[0][0]))) \
+                  * np.array([1 + R[0][0], R[1][0], R[2][0]])
         return VecToso3(pi*omg)
     else:
         acosinput = (np.trace(R) - 1) / 2.0
@@ -189,7 +189,7 @@ Output:
  [0, 1,  0, 5],
  [0, 0,  0, 1]]
     '''
-    return np.r_[np.c_[R,p],[[0, 0, 0, 1]]]    
+    return np.r_[np.c_[R, p], [[0, 0, 0, 1]]]    
 
 
 def TransToRp (T):
@@ -232,7 +232,7 @@ Output:
     '''
     R,p = TransToRp(T)
     Rt = np.array(R).T
-    return np.r_[np.c_[Rt,-np.dot(Rt, p)],[[0, 0, 0, 1]]]
+    return np.r_[np.c_[Rt, -np.dot(Rt, p)], [[0, 0, 0, 1]]]
     
 def VecTose3(V):
 #Takes a 6-vector (representing a spatial velocity). 
@@ -246,8 +246,8 @@ Output:
  [-2,  1,  0, 6], 
  [ 0,  0,  0, 0]]
     '''
-    so3mat = VecToso3([V[0], V[1], V[2]])
-    return np.r_[np.c_[so3mat,[V[3], V[4], V[5]]],np.zeros((1,4))]
+    return np.r_[np.c_[VecToso3([V[0], V[1], V[2]]), [V[3], V[4], V[5]]],
+                 np.zeros((1,4))]
 
 def se3ToVec(se3mat):
 #Takes se3mat a 4x4 se(3) matrix.
@@ -261,8 +261,8 @@ se3mat = [[ 0, -3,  2, 4],
 Output:
 [1, 2, 3, 4, 5, 6]
     '''
-    omg = [se3mat[2][1], se3mat[0][2], se3mat[1][0]]
-    return np.r_[omg,[se3mat[0][3], se3mat[1][3], se3mat[2][3]]]
+    return np.r_[[se3mat[2][1], se3mat[0][2], se3mat[1][0]],
+                 [se3mat[0][3], se3mat[1][3], se3mat[2][3]]]
 
 
 def Adjoint(T):
@@ -283,7 +283,8 @@ Output:
  [0, 0,  0, 0, 1,  0]]
     '''
     R,p = TransToRp(T)
-    return np.r_[np.c_[R,np.zeros((3,3))],np.c_[np.dot(VecToso3(p),R),R]]
+    return np.r_[np.c_[R, np.zeros((3,3))],
+                 np.c_[np.dot(VecToso3(p),R), R]]
 
 def ScrewToAxis(q,s,h):
 #Takes q: a point lying on the screw axis, 
@@ -298,7 +299,7 @@ h = 2
 Output:
 [0, 0, 1, 0, -3, 2]
     '''
-    return np.r_[s,np.cross(q,s) + np.dot(h,s)]
+    return np.r_[s, np.cross(q,s) + np.dot(h,s)]
 
 def AxisAng6(expc6):
 #Takes a 6-vector of exponential coordinates for rigid-body motion S*theta.
@@ -323,10 +324,10 @@ def MatrixExp6(expmat):
 #Rodriguez R = I + sin(theta)*omg + (1-cos(theta))*omg^2
     '''
 Example Input: 
-expmat = [[0,          0,           0,          0],
-          [0,          0, -1.57079633, 2.35619449],
-          [0, 1.57079633,           0, 2.35619449],
-          [0,          0,           0,          0]]
+expmat = [[0,                 0,                  0,                 0],
+          [0,                 0, -1.570796326794897, 2.356194490192345],
+          [0, 1.570796326794897,                  0, 2.356194490192345],
+          [0,                 0,                  0,                 0]]
 Output:
 [[1.0, 0.0,  0.0, 0.0],
  [0.0, 0.0, -1.0, 0.0],
@@ -335,16 +336,21 @@ Output:
     '''  
     omgtheta = so3ToVec(np.array(expmat)[0:3:1,0:3:1])
     if Nearzero(np.linalg.norm(omgtheta)):
-        termv = [expmat[0][3],expmat[1][3],expmat[2][3]]
-        return np.r_[np.c_[np.eye(3),termv],[[0, 0, 0, 1]]]
+        return np.r_[np.c_[np.eye(3),
+                           [expmat[0][3],expmat[1][3],expmat[2][3]]],
+                     [[0, 0, 0, 1]]]
     else:
         theta = AxisAng3(omgtheta)[1]
         omgmat = np.array(expmat)[0:3:1,0:3:1] / theta
-        term3 = (theta - np.sin(theta)) * np.dot(omgmat,omgmat)
-        G = np.eye(3) * theta + (1 - np.cos(theta)) * omgmat + term3
-        termw = MatrixExp3(np.array(expmat)[0:3:1,0:3:1])
-        termvtheta = np.dot(G,[expmat[0][3], expmat[1][3], expmat[2][3]])
-        return np.r_[np.c_[termw,termvtheta / theta],[[0, 0, 0, 1]]]
+        return np.r_[np.c_[MatrixExp3(np.array(expmat)[0:3:1,0:3:1]),
+                           np.dot(np.eye(3) * theta \
+                                  + (1 - np.cos(theta)) * omgmat \
+                                  + (theta - np.sin(theta)) \
+                                    * np.dot(omgmat,omgmat),
+                                  [expmat[0][3],
+                                   expmat[1][3],
+                                   expmat[2][3]]) / theta],
+                     [[0, 0, 0, 1]]]
 
 def MatrixLog6(T):#Takes a transformation matrix T SE(3) 
 #Returns the corresponding 6-vector of exponential coordinates S*theta
@@ -355,42 +361,38 @@ Output:
 [1.5707963267948966, 0.0, 0.0, 0.0, 2.3561944901923448, 2.3561944901923457]
     '''
     R,p = TransToRp(T)
-    Rtrace = R[0][0]+R[1][1]+R[2][2]
-    if(abs(np.linalg.norm(R - np.eye(3))) < 1e-5):
-        omg=[0,0,0]
-        v=p
-        theta=1    
-    else:
-        if(abs(Rtrace + 1) < 1e-5):
-            theta = pi
-            omg = MatrixLog3(R)
-            G = (1/theta)*np.eye(3) - 0.5*np.asarray(VecToso3(omg)) + ((1/theta)-((1/(tan(theta/2.0)))/2.0))*(matmult(VecToso3(omg),VecToso3(omg)))
-            v = np.dot(G,p)
-
-        else:
-	    acosinput = (Rtrace-1)/2.0
-	    if acosinput > 1:
-		acosinput = 1
-	    if acosinput < -1:
-		acosinput = -1
-            theta = acos(acosinput)
-            omg = so3ToVec((1/(2*np.sin(theta)))*(np.subtract(R, RotInv(R))))
-            G = (1/theta)*np.eye(3) - 0.5*np.asarray(VecToso3(omg)) + ((1/theta)-((1/(tan(theta/2.0)))/2.0))*(matmult(VecToso3(omg),VecToso3(omg)))
-            v = np.dot(G,p)     
-
-    return ([omg[0]*theta,omg[1]*theta,omg[2]*theta,v[0]*theta,v[1]*theta,v[2]*theta])
-
-
-
+ #   Rtrace = R[0][0]+R[1][1]+R[2][2]
+    if Nearzero(np.linalg.norm(R - np.eye(3))):
+        return np.r_[np.c_[np.zeros(3,3), [T[0][3],
+                                           T[1][3],
+                                           T[2][3]]],
+                     [[0, 0, 0, 0]]]
+    else: 
+        acosinput = (np.trace(R) - 1) / 2.0
+        if acosinput > 1:
+            acosinput = 1
+	elif acosinput < -1:
+            acosinput = -1		
+        theta = acos(acosinput)       
+        omgmat = MatrixLog3(R) 
+        return np.r_[np.c_[omgmat, 
+                           np.dot(np.eye(3) - omgmat / 2.0 \
+                           + (1.0 / theta - 1.0 / tan(theta / 2.0) / 2) \
+                             * np.dot(omgmat,omgmat) / theta,[T[0][3], 
+                                                              T[1][3], 
+                                                              T[2][3]])], 
+                     [[0, 0, 0, 0]]]
 
 '''
-**********************************************************************************************
-****************************  CHAPTER 4: FORWARD KINEMATICS  *********************************
-**********************************************************************************************
+*** CHAPTER 4: FORWARD KINEMATICS ***
 '''
-def FKinBody(M, Blist, thetalist):#Takes M: the home configuration (position and orientation) of the end-effector,
-#Blist: The joint screw axes in the end-effector frame when the manipulator is at the home position,
-#thetalist: A list of joint coordinates.
+
+def FKinBody(M, Blist, thetalist):
+#Takes M: the home configuration (position and orientation) of 
+#         the end-effector,
+#      Blist: The joint screw axes in the end-effector frame when the 
+#             manipulator is at the home position,
+#      thetalist: A list of joint coordinates.
 #Returns T (SE(3)) representing the end-effector frame
 #when the joints are at the specified coordinates (i.t.o Body Frame).
     '''

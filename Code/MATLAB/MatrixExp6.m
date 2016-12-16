@@ -24,12 +24,13 @@ omgtheta = so3ToVec(expmat(1:3,1:3));
 if Nearzero(norm(omgtheta))
     T = [eye(3), expmat(1:3,4); 0, 0, 0, 1];
 else
-    [omghat,theta] = AxisAng3(omgtheta);
-    omgmat = expmat(1:3,1:3) / theta;
-    term3 = (theta - sin(theta)) * omgmat * omgmat
-    G = eye(3) * theta + (1 - cos(theta)) * omgmat + term3;
-    termv =  G * expmat(1:3,4) / theta;
-    T = [MatrixExp3(expmat(1:3,1:3)), termv; 0, 0, 0, 1];
+    [omghat, theta] = AxisAng3(omgtheta);
+    omgmat = expmat(1:3,1:3) / theta; 
+    T = [MatrixExp3(expmat(1:3,1:3)), ...
+         (eye(3) * theta + (1 - cos(theta)) * omgmat ...
+          + (theta - sin(theta)) * omgmat * omgmat) ...
+            * expmat(1:3,4) / theta;
+         0, 0, 0, 1];
 end
 end
 

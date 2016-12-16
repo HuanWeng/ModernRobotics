@@ -17,7 +17,7 @@ function invT = TransInv(T)
 %     0     0     1    -3
 %     0    -1     0     0
 %     0     0     0     1
-[R,p] = TransToRp(T);
+[R, p] = TransToRp(T);
 invT = [R', -1 * R' * p; 0, 0, 0, 1];
 end
 

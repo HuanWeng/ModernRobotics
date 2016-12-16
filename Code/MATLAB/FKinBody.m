@@ -1,12 +1,11 @@
-%**********************************************************************************************
-%****************************  CHAPTER 4: FORWARD KINEMATICS  *********************************
-%**********************************************************************************************
+%*** CHAPTER 4: FORWARD KINEMATICS ***
 
 function T = FKinBody(M,Blist,thetalist)
-% Takes M: the home configuration (position and orientation) of the end-effector,
-% Blist: The joint screw axes in the end-effector frame when the manipulator
-% is at the home position,
-% thetalist: A list of joint coordinates.
+% Takes M: the home configuration (position and orientation) of the
+%          end-effector,
+%       Blist: The joint screw axes in the end-effector frame when the 
+%              manipulator is at the home position,
+%       thetalist: A list of joint coordinates.
 % Returns T (SE(3)) representing the end-effector frame 
 % when the joints are at the specified coordinates (i.t.o Body Frame).
 % Example Inputs:
@@ -27,14 +26,10 @@ n1=size(M);
 Blist = Blist';
 n2=size(Blist);
 n3=size(thetalist);
-if n1(1)==4 && n1(2)==4 && n2(1)==6 && n2(2)==n3(2) && n3(1)==1
     T=M;
     for i=1:n2(2)
         T=T*MatrixExp6(thetalist(i)*Blist(:,i));
     end
-else
-    msg = 'Input is not appropriate.';
-    error(msg);
-end
+
 end
 

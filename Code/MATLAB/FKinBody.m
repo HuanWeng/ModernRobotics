@@ -11,9 +11,9 @@ function T = FKinBody(M,Blist,thetalist)
 % Example Inputs:
 %{
   clear;clc;
-  M = [[-1,0,0,0]; [0,1,0,6]; [0,0,-1,2]; [0,0,0,1]];
-  Blist = [[0,0,-1,2,0,0]; [0,0,0,0,1,0]; [0,0,1,0,0,0.1]];
-  thetalist =[(pi/2.0),3,pi];
+  M = [[-1, 0, 0, 0]; [0, 1, 0, 6]; [0, 0, -1, 2]; [0, 0, 0, 1]];
+  Blist = [[0; 0; -1; 2; 0; 0], [0; 0; 0; 0; 1; 0], [0; 0; 1; 0; 0; 0.1]];
+  thetalist = [pi / 2; 3; pi];
   T = FKinBody(M,Blist,thetalist)
 %}
 % Output:
@@ -22,14 +22,8 @@ function T = FKinBody(M,Blist,thetalist)
 %    1.0000    0.0000         0    4.0000
 %         0         0   -1.0000    1.6858
 %         0         0         0    1.0000
-n1=size(M);
-Blist = Blist';
-n2=size(Blist);
-n3=size(thetalist);
-    T=M;
-    for i=1:n2(2)
-        T=T*MatrixExp6(thetalist(i)*Blist(:,i));
-    end
-
+T = M;
+for i = 1:size(thetalist)
+	T = T * MatrixExp6(VecTose3(Blist(:,i) * thetalist(i)));
 end
-
+end

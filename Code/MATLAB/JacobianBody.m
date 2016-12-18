@@ -1,17 +1,18 @@
-%**********************************************************************************************
-%**********************  CHAPTER 5: VELOCITY KINEMATICS AND STATICS  **************************
-%**********************************************************************************************
+%*** CHAPTER 5: VELOCITY KINEMATICS AND STATICS ***
 
-function Jb = JacobianBody(Blist, thetalist)
-% Takes Blist: The joint screw axes in the end-effector frame when 
-% the manipulator is at the home position,
-% thetalist: A list of joint coordinates.
+function Jb = JacobianBody(Blist,thetalist)
+% Takes Blist: The joint screw axes in the end-effector frame when the
+%              manipulator is at the home position,
+%       thetalist: A list of joint coordinates.
 % Returns the corresponding body Jacobian (6xn real numbers).
 % Example Input:
 %{
   clear;clc;
-  Blist = [[0,0,1,0,0.2,0.2]; [1,0,0,2,0,3]; [0,1,0,0,2,1];[1,0,0,0.2,0.3,0.4]];
-  thetalist = [0.2,1.1,0.1,1.2];
+  Blist = [[0; 0; 1;   0; 0.2; 0.2], ...
+           [1; 0; 0;   2;   0;   3], ...
+           [0; 1; 0;   0;   2;   1], ...
+           [1; 0; 0; 0.2; 0.3; 0.4]];
+  thetalist = [0.2; 1.1; 0.1; 1.2];
   Jb = JacobianBody(Blist, thetalist)
 %} 
 % Output:
@@ -22,21 +23,10 @@ function Jb = JacobianBody(Blist, thetalist)
 %    2.3259    1.6681    0.5641    0.2000
 %   -1.4432    2.9456    1.4331    0.3000
 %   -2.0664    1.8288   -1.5887    0.4000
-n=length(thetalist);
-Blist = Blist';
-Jb=zeros(6,n);
-if n==size(Blist,2)
-    Jb(:,n)=Blist(:,n);
-    for i=1:n-1
-        e=eye(4);
-        for j=i+1:n
-            e=MatrixExp6(-1*Blist(:,j)*thetalist(j))*e;
-        end
-        Jb(:,i)=Adjoint(e)*Blist(:,i);
-    end
-else
-    msg = 'Input is not appropriate.';
-    error(msg);
+Jb = Blist;
+T = eye(4);
+for i = length(thetalist) - 1:-1:1   
+    T = T * MatrixExp6(VecTose3(-1 * Blist(:,i + 1) * thetalist(i + 1)));
+	Jb(:,i) = Adjoint(T) * Blist(:,i);
 end
 end
-

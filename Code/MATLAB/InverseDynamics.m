@@ -1,20 +1,23 @@
-%**********************************************************************************************
-%***************************  CHAPTER 8: DYNAMICS OF OPEN CHAINS  *****************************
-%**********************************************************************************************
+%*** CHAPTER 8: DYNAMICS OF OPEN CHAINS ***
 
-function taulist = InverseDynamics(thetalist,dthetalist,ddthetalist,g,Ftip,Mlist,Glist,Slist)
+function taulist = InverseDynamics(thetalist,dthetalist,ddthetalist,g, ...
+                                   Ftip,Mlist,Glist,Slist)
 % Takes thetalist: n-vector of joint variables,
-% dthetalist: n-vector of joint rates,
-% ddthetalist: n-vector of joint accelerations,
-% g: Gravity vector g,
-% Ftip: Spatial force applied by the end-effector expressed in frame {n+1},
-% Mlist: List of link frames {i} relative to {i-1} at the home position,
-% Glist: Spatial inertia matrices Gi of the links,
-% Slist: Screw axes Si of the joints in a space frame.
+%       dthetalist: n-vector of joint rates,
+%       ddthetalist: n-vector of joint accelerations,
+%       g: Gravity vector g,
+%       Ftip: Spatial force applied by the end-effector expressed in frame 
+%             {n+1},
+%       Mlist: List of link frames {i} relative to {i-1} at the home 
+%              position,
+%       Glist: Spatial inertia matrices Gi of the links,
+%       Slist: Screw axes Si of the joints in a space frame.
 %
 % Returns taulist: The n-vector of required joint forces/torques.
-% This function uses forward-backward Newton-Euler iterations to solve the equation:
-% taulist = Mlist(thetalist)ddthetalist + c(thetalist,dthetalist) + g(thetalist) + Jtr(thetalist)Ftip
+% This function uses forward-backward Newton-Euler iterations to solve the 
+% equation:
+% taulist = Mlist(thetalist)ddthetalist + c(thetalist,dthetalist) ...
+%           + g(thetalist) + Jtr(thetalist)Ftip
 %
 % Example Input (3 Link Robot):
 %{ 

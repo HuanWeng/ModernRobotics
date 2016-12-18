@@ -1,6 +1,4 @@
-%**********************************************************************************************
-%**********************  CHAPTER 5: VELOCITY KINEMATICS AND STATICS  **************************
-%**********************************************************************************************
+%*** CHAPTER 5: VELOCITY KINEMATICS AND STATICS ***
 
 function Js = JacobianSpace(Slist,thetalist)
 % Takes Slist: The joint screw axes in the space frame 
@@ -10,8 +8,11 @@ function Js = JacobianSpace(Slist,thetalist)
 % Example Input:
 %{
   clear;clc;
-  Slist = [[0,0,1,0,0.2,0.2]; [1,0,0,2,0,3]; [0,1,0,0,2,1];[1,0,0,0.2,0.3,0.4]];
-  thetalist = [0.2,1.1,0.1,1.2];
+  Slist = [[0; 0; 1;   0; 0.2; 0.2], ...
+           [1; 0; 0;   2;   0;   3], ...
+           [0; 1; 0;   0;   2;   1], ...
+           [1; 0; 0; 0.2; 0.3; 0.4]];
+  thetalist = [0.2; 1.1; 0.1; 1.2];
   Js = JacobianSpace(Slist,thetalist)
 %} 
 % Output:
@@ -22,21 +23,10 @@ function Js = JacobianSpace(Slist,thetalist)
 %         0    1.9522   -2.2164   -0.5116
 %    0.2000    0.4365   -2.4371    2.7754
 %    0.2000    2.9603    3.2357    2.2251
-n=length(thetalist);
-Slist = Slist';
-Js=zeros(6,n);
-if n==size(Slist,2)
-    Js(:,1)=Slist(:,1);
-    for i=2:n
-        e=eye(4);
-        for j=1:i-1
-            e=e*MatrixExp6(Slist(:,j)*thetalist(j));
-        end
-        Js(:,i)=Adjoint(e)*Slist(:,i);
-    end
-else
-    msg = 'Input is not appropriate.';
-    error(msg);
+Js = Slist;
+T = eye(4);
+for i = 2:length(thetalist)
+    T = T * MatrixExp6(VecTose3(Slist(:,i - 1) * thetalist(i - 1)));
+	Js(:,i) = Adjoint(T) * Slist(:,i);
 end
 end
-

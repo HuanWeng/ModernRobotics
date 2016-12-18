@@ -341,7 +341,7 @@ Output:
                      [[0, 0, 0, 1]]]
     else:
         theta = AxisAng3(omgtheta)[1]
-        omgmat = np.array(expmat)[0:3:1,0:3:1] / theta
+        omgmat = np.array(expmat)[0:3,0:3] / theta
         return np.r_[np.c_[MatrixExp3(np.array(expmat)[0:3:1,0:3:1]),
                            np.dot(np.eye(3) * theta \
                                   + (1 - np.cos(theta)) * omgmat \
@@ -352,7 +352,8 @@ Output:
                                    expmat[2][3]]) / theta],
                      [[0, 0, 0, 1]]]
 
-def MatrixLog6(T):#Takes a transformation matrix T SE(3) 
+def MatrixLog6(T):
+#Takes a transformation matrix T SE(3) 
 #Returns the corresponding 6-vector of exponential coordinates S*theta
     '''
 Example Input: 
@@ -361,11 +362,9 @@ Output:
 [1.5707963267948966, 0.0, 0.0, 0.0, 2.3561944901923448, 2.3561944901923457]
     '''
     R,p = TransToRp(T)
- #   Rtrace = R[0][0]+R[1][1]+R[2][2]
     if Nearzero(np.linalg.norm(R - np.eye(3))):
-        return np.r_[np.c_[np.zeros(3,3), [T[0][3],
-                                           T[1][3],
-                                           T[2][3]]],
+        return np.r_[np.c_[np.zeros((3,3)),
+                           [T[0][3], T[1][3], T[2][3]]],
                      [[0, 0, 0, 0]]]
     else: 
         acosinput = (np.trace(R) - 1) / 2.0
@@ -387,7 +386,7 @@ Output:
 *** CHAPTER 4: FORWARD KINEMATICS ***
 '''
 
-def FKinBody(M, Blist, thetalist):
+def FKinBody(M,Blist,thetalist):
 #Takes M: the home configuration (position and orientation) of 
 #         the end-effector,
 #      Blist: The joint screw axes in the end-effector frame when the 
@@ -397,68 +396,64 @@ def FKinBody(M, Blist, thetalist):
 #when the joints are at the specified coordinates (i.t.o Body Frame).
     '''
 Example Input: 
-M = [[-1,0,0,0], [0,1,0,6], [0,0,-1,2], [0,0,0,1]]
-Blist = [[0,0,-1,2,0,0],[0,0,0,0,1,0],[0,0,1,0,0,0.1]]
-thetalist =[(pi/2.0),3,pi]
+M = [[-1, 0, 0, 0], [0, 1, 0, 6], [0, 0, -1, 2], [0, 0, 0, 1]]
+Blist = np.array([[0, 0, -1, 2, 0,   0],
+                  [0, 0,  0, 0, 1,   0], 
+                  [0, 0,  1, 0, 0, 0.1]]).T
+thetalist =[pi / 2.0, 3, pi]
 Output:
 [[ -1.14423775e-17   1.00000000e+00   0.00000000e+00  -5.00000000e+00],
 [  1.00000000e+00   1.14423775e-17   0.00000000e+00   4.00000000e+00],
 [ 0.          0.         -1.          1.68584073],
 [ 0.  0.  0.  1.]]
     '''
-    try:
-        T = np.eye(4)
-        T = np.dot(M,T)
-        for i in range(len(Blist)):
-            T = np.dot(T,MatrixExp6(np.asarray(Blist[i])*thetalist[i]))       
-        
-        return T
-    except:
-        print ("Input is not appropriate")
+    T = M
+    for i in range(len(thetalist)):
+        T = np.dot(T,MatrixExp6(VecTose3(Blist[:,i] * thetalist[i])))              
+    return T
 
-
-def FKinSpace(M, Slist, thetalist):#Takes M: the home configuration (position and orientation) of the end-effector,
-#Slist: The joint screw axes in the space frame when the manipulator is at the home position,
-#thetalist: A list of joint coordinates.
-#Returns T (SE(3)) representing the end-effector frame 
-#when the joints are at the specified coordinates (i.t.o Space Frame).
+def FKinSpace(M,Slist,thetalist):
+#Takes M: the home configuration (position and orientation) of the 
+#         end-effector,
+#      Slist: The joint screw axes in the space frame when the manipulator
+#             is at the home position,
+#      thetalist: A list of joint coordinates.
+#Returns T (SE(3)) representing the end-effector frame when the joints are 
+#at the specified coordinates (i.t.o Space Frame).
     '''
 Example Input: 
-M = [[-1,0,0,0], [0,1,0,6], [0,0,-1,2], [0,0,0,1]]
-Slist = [[0,0,1,4,0,0],[0,0,0,0,1,0],[0,0,-1,-6,0,-0.1]]
-thetalist =[(pi/2.0),3,pi]
+M = [[-1, 0, 0, 0], [0, 1, 0, 6], [0, 0, -1, 2], [0, 0, 0, 1]]
+Slist = np.array([[0, 0,  1,  4, 0,    0],
+                  [0, 0,  0,  0, 1,    0],
+                  [0, 0, -1, -6, 0, -0.1]]).T
+thetalist =[pi / 2.0, 3, pi]
 Output:
 [[ -1.14423775e-17   1.00000000e+00   0.00000000e+00  -5.00000000e+00],
 [  1.00000000e+00   1.14423775e-17   0.00000000e+00   4.00000000e+00],
 [ 0.          0.         -1.          1.68584073],
 [ 0.  0.  0.  1.]]
     '''
-    try:
-        T = np.eye(4)
-        for i in range(len(Slist)):
-            T = np.dot(T,MatrixExp6(np.asarray(Slist[i])*thetalist[i]))
-        
-        T = np.dot(T,M)
-        return T
-    except:
-        print ("Input is not appropriate")
-
-
-
-
+    T = M
+    for i in range(len(thetalist)-1,-1,-1):
+        T = np.dot(MatrixExp6(VecTose3(Slist[:,i] * thetalist[i])),T)
+    return T
 
 '''
-**********************************************************************************************
-**********************  CHAPTER 5: VELOCITY KINEMATICS AND STATICS  **************************
-**********************************************************************************************
+*** CHAPTER 5: VELOCITY KINEMATICS AND STATICS***
 '''
-def JacobianBody(Blist, thetalist):#Takes Blist: The joint screw axes in the end-effector frame when the manipulator is at the home position,
-#thetalist: A list of joint coordinates. 
+
+def JacobianBody(Blist,thetalist):
+#Takes Blist: The joint screw axes in the end-effector frame when the
+#             manipulator is at the home position,
+#      thetalist: A list of joint coordinates. 
 #Returns the corresponding body Jacobian (6xn real numbers).
     '''
 Example Input: 
-Blist = [[0,0,1,0,0.2,0.2],[1,0,0,2,0,3],[0,1,0,0,2,1],[1,0,0,0.2,0.3,0.4]]
-thetalist = [0.2,1.1,0.1,1.2]
+Blist = np.array([[0, 0, 1,   0, 0.2, 0.2], 
+                  [1, 0, 0,   2,   0,   3], 
+                  [0, 1, 0,   0,   2,   1], 
+                  [1, 0, 0, 0.2, 0.3, 0.4]]).T
+thetalist = [0.2, 1.1, 0.1, 1.2]
 Output:
 [[-0.04528405  0.99500417  0.          1.        ]
  [ 0.74359313  0.09304865  0.36235775  0.        ]
@@ -467,32 +462,26 @@ Output:
  [-1.44321167  2.94561275  1.43306521  0.3       ]
  [-2.06639565  1.82881722 -1.58868628  0.4       ]]
     '''
-    if (len(Blist)==len(thetalist)):
-        Jb = [[0]*6 for i in range(len(Blist))]
-        for i in range(len(Blist)):
-            if (len(Blist[i])==6):
-                JbAdj = MatrixExp6(matmult(matmult(Blist[len(Blist)-1],-1),thetalist[len(Blist)-1])) 
-                for j in range (len(Blist)-2-i):
-                    JbAdj = matmult(JbAdj,MatrixExp6(matmult(matmult(Blist[len(Blist)-j-2],-1),thetalist[len(Blist)-j-2]))) 
-               
-                JbAdj = Adjoint(JbAdj)
-                Jb[i] = matmult(JbAdj,Blist[i]) 
-            else:
-                print "There is the wrong number of elements in the inputted screw axes"
-                return
-        return np.asarray(Jb).T
-    else:
-        print "The input has a different number of screw axes and joint angles"
-        return
+    Jb = Blist.copy()
+    T = np.eye(4)
+    for i in range(len(thetalist) - 2,-1,-1):
+        T = np.dot(T,MatrixExp6(VecTose3(Blist[:,i + 1] \
+                                * -thetalist[i + 1])))
+        Jb[:,i] = np.dot(Adjoint(T),Blist[:,i])  
+    return Jb
 
-
-def JacobianSpace(Slist, thetalist):#Takes Slist: The joint screw axes in the space frame when the manipulator is at the home position,
-#thetalist: A list of joint coordinates.
+def JacobianSpace(Slist, thetalist):
+#Takes Slist: The joint screw axes in the space frame when the manipulator 
+#             is at the home position,
+#      thetalist: A list of joint coordinates.
 #Returns the corresponding space Jacobian (6xn real numbers).
     '''
 Example Input: 
-Slist = [[0,0,1,0,0.2,0.2],[1,0,0,2,0,3],[0,1,0,0,2,1],[1,0,0,0.2,0.3,0.4]]
-thetalist = [0.2,1.1,0.1,1.2]
+Slist = np.array([[0, 0, 1,   0, 0.2, 0.2], 
+                  [1, 0, 0,   2,   0,   3], 
+                  [0, 1, 0,   0,   2,   1], 
+                  [1, 0, 0, 0.2, 0.3, 0.4]]).T
+thetalist = [0.2, 1.1, 0.1, 1.2]
 Output:
 [[ 0.          0.98006658 -0.09011564  0.95749426]
  [ 0.          0.19866933  0.4445544   0.28487557]
@@ -501,159 +490,163 @@ Output:
  [ 0.2         0.43654132 -2.43712573  2.77535713]
  [ 0.2         2.96026613  3.23573065  2.22512443]]
     '''
-    if (len(Slist)==len(thetalist)):
-        Js = [[0]*6 for i in range(len(Slist))]
-        Js[0] = Slist[0]
-        for i in range(1,len(Slist)):
-            if (len(Slist[i])==6):               
-                JsAdj = MatrixExp6(matmult(Slist[0],thetalist[0]))
-                for j in range (i-1):                 
-                    JsAdj = matmult(JsAdj, MatrixExp6(matmult(Slist[j+1],thetalist[j+1]))) 
-                JsAdj = Adjoint(JsAdj)
-                Js[i] = matmult(JsAdj,Slist[i]) 
-            else:
-                print "There is the wrong number of elements in the inputted screw axes"
-                return
-        return np.asarray(Js).T
-    else:
-        print "The input has a different number of screw axes and joint angles"
-        return
+    Js = Slist.copy()
+    T = np.eye(4)
+    for i in range(1,len(thetalist)):
+        T = np.dot(T,MatrixExp6(VecTose3(Slist[:,i - 1] \
+                                * thetalist[i - 1])))
+        Js[:,i] = np.dot(Adjoint(T),Slist[:,i])  
+    return Js
     
-
-
-
-
 '''
-**********************************************************************************************
-*****************************  CHAPTER 6: INVERSE KINEMATICS  ********************************
-**********************************************************************************************
+*** CHAPTER 6: INVERSE KINEMATICS ***
 '''
-def IKinBody(Blist, M, T, thetalist0, eomg, ev):
-#Takes Blist: The joint screw axes in the end-effector frame 
-#when the manipulator is at the home position.
-#M: The home configuration of the end-effector.
-#T: The desired end-effector configuration Tsd
-#thetalist0: An initial guess of joint angles that are close to satisfying Tsd
-#eomg: A small positive tolerance on the end-effector orientation error. The returned joint angles
-#must give an end-effector orientation error less than eomg.
-#ev: A small positive tolerance on the end-effector linear position error. The returned joint
-#angles must give an end-effector position error less than ev.
 
-#The maximum number of iterations before the algorithm is terminated has been hardcoded in as a variable called maxiterations. It is set to 20 at the start of the function, but can be changed if needed.  
+def IKinBody(Blist,M,T,thetalist0,eomg,ev):
+#Takes Blist: The joint screw axes in the end-effector frame when the 
+#             manipulator is at the home position.
+#      M: The home configuration of the end-effector.
+#      T: The desired end-effector configuration Tsd
+#      thetalist0: An initial guess of joint angles that are close to 
+#                  satisfying Tsd
+#      eomg: A small positive tolerance on the end-effector orientation 
+#            error. The returned joint angles must give an end-effector 
+#            orientation error less than eomg.
+#      ev: A small positive tolerance on the end-effector linear position 
+#          error. The returned joint angles must give an end-effector 
+#          position error less than ev.
 
-#Returns thetalist: Joint angles that achieve T within the specified tolerances,
-#success: A logical value where TRUE means that the function found a solution and FALSE
-#means that it ran through the set number of maximum iterations without finding a solution
-#within the tolerances eomg and ev.
+#The maximum number of iterations before the algorithm is terminated has 
+#been hardcoded in as a variable called maxiterations. It is set to 20 at 
+#the start of the function, but can be changed if needed.  
+
+#Returns thetalist: Joint angles that achieve T within the specified
+#                   tolerances,
+#        success: A logical value where TRUE means that the function found 
+#                 a solution and FALSE means that it ran through the set 
+#                 number of maximum iterations without finding a solution
+#                 within the tolerances eomg and ev.
 #Uses an iterative Newton-Raphson root-finding method
     '''
 Example Input: 
-Blist = [[0,1,0,0.191,0,0.817],[0,0,1,0.095,-0.817,0],[0,0,1,0.095,-0.392,0],[0,0,1,0.095,0,0],[0,-1,0,-0.082,0,0],[0,0,1,0,0,0]]
-M = [[1,0,0,-0.817],
-    [0,0,-1,-0.191],
-    [0,1,0,-0.006],
-    [0,0,0,1]]
-T = [[0,1,0,-0.6], [0,0,-1,0.1], [-1,0,0,0.1], [0,0,0,1]]
-thetalist0 =[0,0,0,0,0,0]
+Blist = np.array([[0,  1, 0,  0.191,      0, 0.817], 
+                  [0,  0, 1,  0.095, -0.817,     0],
+                  [0,  0, 1,  0.095, -0.392,     0],
+                  [0,  0, 1,  0.095,      0,     0],
+                  [0, -1, 0, -0.082,      0,     0],
+                  [0,  0, 1,      0,      0,     0]]).T
+M = [[1, 0,  0, -0.817], 
+     [0, 0, -1, -0.191], 
+     [0, 1,  0, -0.006], 
+     [0, 0,  0,      1]]
+T = [[0, 1, 0, -0.6], [0, 0, -1, 0.1], [-1, 0, 0, 0.1], [0, 0, 0, 1]]
+thetalist0 =[0, 0, 0, 0, 0, 0]
 eomg = 0.01
 ev = 0.001
 Output:
 thetalist:
-[-0.46921905 -0.83447622  1.39525223 -0.56107486 -0.46731326 -1.57056352]
+[-0.46921905, -0.83447622,  1.39525223, -0.56107486, -0.46731326, -1.57056352]
 success:
 True
     '''
+    thetalist = np.array(thetalist0).copy()
+    i = 0
     maxiterations = 20
-    success = False
-    thf =[]#Final return variable
-    thf.append(thetalist0)
-    Vb = MatrixLog6(matmult(TransInv(FKinBody(M, Blist, thetalist0)),T))
-    wb  = Magnitude ([Vb[0],Vb[1],Vb[2]])
-    vb = Magnitude ([Vb[3],Vb[4],Vb[5]])
-    for i in range (maxiterations):
-        if (wb>eomg or vb>ev):
-            thetalist0 = np.add(thetalist0, matmult(np.linalg.pinv(JacobianBody(Blist, thetalist0)),Vb))
-            thf.append(thetalist0)
-            Vb = MatrixLog6(matmult(TransInv(FKinBody(M, Blist, thetalist0)),T))
-            wb  = Magnitude ([Vb[0],Vb[1],Vb[2]])
-            vb = Magnitude ([Vb[3],Vb[4],Vb[5]])
-        else:
-            success = True
-            return (thf[len(thf)-1],success)
-    return (thf[len(thf)-1],success)
+    success = True
+    Vb = se3ToVec(MatrixLog6(np.dot(TransInv(FKinBody(M,Blist, \
+                                                      thetalist)),T)))
+    err = np.linalg.norm([Vb[0], Vb[1], Vb[2]]) > eomg \
+          or np.linalg.norm([Vb[3], Vb[4], Vb[5]]) > ev
+    while err and i < maxiterations:
+        thetalist = thetalist \
+                    + np.dot(np.linalg.pinv(JacobianBody(Blist, \
+                                                         thetalist)),Vb)
+        i = i + 1
+        Vb = se3ToVec(MatrixLog6(np.dot(TransInv(FKinBody(M,Blist, \
+                                                          thetalist)),T)))
+        err = np.linalg.norm([Vb[0], Vb[1], Vb[2]]) > eomg \
+              or np.linalg.norm([Vb[3], Vb[4], Vb[5]]) > ev
+    if err:
+        success = False
+    return (thetalist,success)
 
+def IKinSpace(Slist,M,T,thetalist0,eomg,ev):
+#Takes Slist: The joint screw axes in the space frame when the manipulator 
+#             is at the home position.
+#      M: The home configuration of the end-effector.
+#      T: The desired end-effector configuration Tsd
+#      thetalist0: An initial guess of joint angles that are close to 
+#                  satisfying Tsd
+#      eomg: A small positive tolerance on the end-effector orientation 
+#            error. The returned joint angles must give an end-effector 
+#            orientation error less than eomg.
+#      ev: A small positive tolerance on the end-effector linear position 
+#          error. The returned joint angles must give an end-effector 
+#          position error less than ev.
 
-def IKinSpace(Slist, M, T, thetalist0, eomg, ev):
-#Takes Slist: The joint screw axes in the space frame 
-#when the manipulator is at the home position.
-#M: The home configuration of the end-effector.
-#T: The desired end-effector configuration Tsd
-#thetalist0: An initial guess of joint angles that are close to satisfying Tsd
-#eomg: A small positive tolerance on the end-effector orientation error. The returned joint angles
-#must give an end-effector orientation error less than eomg.
-#ev: A small positive tolerance on the end-effector linear position error. The returned joint
-#angles must give an end-effector position error less than ev.
+#The maximum number of iterations before the algorithm is terminated has 
+#been hardcoded in as a variable called maxiterations. It is set to 20 at 
+#the start of the function, but can be changed if needed.  
 
-#The maximum number of iterations before the algorithm is terminated has been hardcoded in as a variable called maxiterations. It is set to 20 at the start of the function, but can be changed if needed.  
-
-#Returns thetalist: Joint angles that achieve T within the specified tolerances,
-#success: A logical value where TRUE means that the function found a solution and FALSE
-#means that it ran through the set number of maximum iterations without finding a solution
-#within the tolerances eomg and ev.
+#Returns thetalist: Joint angles that achieve T within the specified 
+#                   tolerances,
+#        success: A logical value where TRUE means that the function found 
+#                 a solution and FALSE means that it ran through the set 
+#                 number of maximum iterations without finding a solution
+#                 within the tolerances eomg and ev.
 #Uses an iterative Newton-Raphson root-finding method
     '''
 Example Input: 
-Slist = [[0,0,1,0,0,0],[0,1,0,0,0,0],[0,0,1,0,0,0],[0,1,0,-0.550,0,0.045],[0,0,1,0,0,0],[0,1,0,-0.850,0,0],[0,0,1,0,0,0]]
-M = [[1,0,0,0],
-    [0,1,0,0],
-    [0,0,1,0.910],
-    [0,0,0,1]]
-T = [[1,0,0,0.4], [0,1,0,0], [0,0,1,0.4], [0,0,0,1]]
-thetalist0 = [0,0,0,0,0,0,0]
+Slist = np.array([[0, 0, 1,      0, 0,     0], 
+                  [0, 1, 0,      0, 0,     0],
+                  [0, 0, 1,      0, 0,     0],
+                  [0, 1, 0, -0.550, 0, 0.045],
+                  [0, 0, 1,      0, 0,     0],
+                  [0, 1, 0, -0.850, 0,     0],
+                  [0, 0, 1,      0, 0,     0]]).T
+M = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.910], [0, 0, 0, 1]]
+T = [[1, 0, 0, 0.4], [0, 1, 0, 0], [0, 0, 1, 0.4], [0, 0, 0, 1]]
+thetalist0 = [0, 0, 0, 0, 0, 0, 0]
 eomg = 0.01
 ev = 0.001
 Output:
 thetalist:
-[1.68267377e-15, 1.35367679e+00, 8.56077864e-15, -1.71003042e+00, -5.59462995e-15, 3.56353634e-01, 6.19601080e-15]
+[0, 1.35367679e+00, 0, -1.71003042e+00, 0, 3.56353634e-01, 0]
 success:
 True
     '''
+    thetalist = np.array(thetalist0).copy()
+    i = 0
     maxiterations = 20
-    success = False
-    thf =[]#Final return variable
-    thf.append(thetalist0)
-    Vs = MatrixLog6(matmult(TransInv(FKinSpace(M, Slist, thetalist0)),T))
-    wb  = Magnitude ([Vs[0],Vs[1],Vs[2]])
-    vb = Magnitude ([Vs[3],Vs[4],Vs[5]])
-    for i in range (maxiterations):
-        if (wb>eomg or vb>ev):
-            Js = JacobianSpace(Slist, thetalist0)
-            thetalist0 = np.add(thetalist0, matmult(np.linalg.pinv(Js),Vs))
-            thf.append(thetalist0)
-            Vs = MatrixLog6(matmult(TransInv(FKinSpace(M, Slist, thetalist0)),T))
-            wb  = Magnitude ([Vs[0],Vs[1],Vs[2]])
-            vb = Magnitude ([Vs[3],Vs[4],Vs[5]])
-        else:
-            success = True
-            print i
-            return (thf[len(thf)-1],success)
-    return (thf[len(thf)-1],success)
-
-
-
-
+    success = True
+    Vs = se3ToVec(MatrixLog6(np.dot(TransInv(FKinSpace(M,Slist, \
+                                                       thetalist)),T)))
+    err = np.linalg.norm([Vs[0], Vs[1], Vs[2]]) > eomg \
+          or np.linalg.norm([Vs[3], Vs[4], Vs[5]]) > ev
+    while err and i < maxiterations:
+        thetalist = thetalist \
+                    + np.dot(np.linalg.pinv(JacobianSpace(Slist, \
+                                                          thetalist)),Vs)
+        i = i + 1
+        Vs = se3ToVec(MatrixLog6(np.dot(TransInv(FKinSpace(M,Slist, \
+                                                           thetalist)),T)))
+        err = np.linalg.norm([Vs[0], Vs[1], Vs[2]]) > eomg \
+              or np.linalg.norm([Vs[3], Vs[4], Vs[5]]) > ev
+    if err:
+        success = False
+    return (thetalist,success)
 
 '''
-**********************************************************************************************
-***************************  CHAPTER 8: DYNAMICS OF OPEN CHAINS  *****************************
-**********************************************************************************************
+*** CHAPTER 8: DYNAMICS OF OPEN CHAINS ***
 '''
-def ad(V):#Takes 6-vector spatial velocity 
+
+def ad(V):
+#Takes 6-vector spatial velocity 
 #Returns the corresponding 6x6 matrix [adV].
 #Used to calculate the Lie bracket [V1, V2] = [adV1]V2
     '''
 Example Input: 
-V = [1,2,3,4,5,6]
+V = [1, 2, 3, 4, 5, 6]
 Output:
 [[0, -3, 2, 0, 0, 0],
  [3, 0, -1, 0, 0, 0],
@@ -662,12 +655,10 @@ Output:
  [6, 0, -4, 3, 0, -1],
  [-5, 4, 0, -2, 1, 0]]
     '''
-    w = VecToso3([V[0],V[1],V[2]])
-    v = VecToso3([V[3],V[4],V[5]])
-    adV = [[w[0][0],w[0][1],w[0][2],0,0,0],[w[1][0],w[1][1],w[1][2],0,0,0],[w[2][0],w[2][1],w[2][2],0,0,0],[v[0][0],v[0][1],v[0][2],w[0][0],w[0][1],w[0][2]],[v[1][0],v[1][1],v[1][2],w[1][0],w[1][1],w[1][2]],[v[2][0],v[2][1],v[2][2],w[2][0],w[2][1],w[2][2]]]
-    return adV
-
-    
+    omgmat = VecToso3([V[0], V[1], V[2]])
+    return np.r_[np.c_[omgmat, np.zeros((3,3))], 
+                 np.c_[VecToso3([V[3], V[4], V[5]]), omgmat]]
+ 
 def InverseDynamics(thetalist, dthetalist, ddthetalist, g, Ftip, Mlist, Glist, Slist):
 #Takes thetalist: n-vector of joint variables,
 #dthetalist: n-vector of joint rates,

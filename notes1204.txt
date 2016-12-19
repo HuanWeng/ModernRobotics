@@ -4,6 +4,8 @@ array problem begin at AxisAng3
 Rewrite all the log and exp.
 Check the variable names which should match with those in roblib.pdf file
 input of blist or thetalist in nb. use transpose
+The dimension of thetamat is confusing in the textbook.
+Skip the last two functions of ch8.
 
 Not quite sure about ScrewToAxis.
 

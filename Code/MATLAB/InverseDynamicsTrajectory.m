@@ -1,22 +1,23 @@
-%**********************************************************************************************
-%***************************  CHAPTER 8: DYNAMICS OF OPEN CHAINS  *****************************
-%**********************************************************************************************
+%*** CHAPTER 8: DYNAMICS OF OPEN CHAINS ***
 
-function taumat = InverseDynamicsTrajectory(thetamat,dthetamat,ddthetamat,g,Ftipmat,Mlist,Glist,Slist)
+function taumat = InverseDynamicsTrajectory(thetamat,dthetamat, ...
+                                            ddthetamat,g,Ftipmat,Mlist, ...
+                                            Glist,Slist)
 % Takes thetamat: An N x n matrix of robot joint variables,
-% dthetamat: An N x n matrix of robot joint velocities,
-% ddthetamat: An N x n matrix of robot joint accelerations,
-% g: Gravity vector g,
-% Ftipmat: An N x 6 matrix of spatial forces applied by the end-effector (If there are no tip
-% forces, the user should input a zero and a zero matrix will be used),
-% Mlist: List of link frames i relative to i-1 at the home position,
-% Glist: Spatial inertia matrices Gi of the links,
-% Slist: Screw axes Si of the joints in a space frame.
-% 
-% Returns taumat: The N x n matrix of joint forces/torques for the specified trajectory, where each of
-% the N rows is the vector of joint forces/torques at each time step.
-% This function uses InverseDynamics to calculate the joint forces/torques required to move the
-% serial chain along the given trajectory.
+%       dthetamat: An N x n matrix of robot joint velocities,
+%       ddthetamat: An N x n matrix of robot joint accelerations,
+%       g: Gravity vector g,
+%       Ftipmat: An N x 6 matrix of spatial forces applied by the 
+%                end-effector (If there are no tip forces, the user should
+%                input a zero and a zero matrix will be used),
+%       Mlist: List of link frames i relative to i-1 at the home position,
+%       Glist: Spatial inertia matrices Gi of the links,
+%       Slist: Screw axes Si of the joints in a space frame.
+% Returns taumat: The N x n matrix of joint forces/torques for the 
+%                 specified trajectory, where each of the N rows is the 
+%                 vector of joint forces/torques at each time step.
+% This function uses InverseDynamics to calculate the joint forces/torques 
+% required to move the serial chain along the given trajectory.
 % Example Inputs (3 Link Robot)
 %{
   clc;clear;
@@ -24,7 +25,6 @@ function taumat = InverseDynamicsTrajectory(thetamat,dthetamat,ddthetamat,g,Ftip
   thetastart =[0,0,0];
   thetaend =[pi/2,pi/2,pi/2];
   Tf = 3;
-
   N= 1000;
   method = 5 ;
   traj = JointTrajectory(thetastart, thetaend, Tf, N, method);

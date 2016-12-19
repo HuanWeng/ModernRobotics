@@ -659,109 +659,101 @@ Output:
     return np.r_[np.c_[omgmat, np.zeros((3,3))], 
                  np.c_[VecToso3([V[3], V[4], V[5]]), omgmat]]
  
-def InverseDynamics(thetalist, dthetalist, ddthetalist, g, Ftip, Mlist, Glist, Slist):
+def InverseDynamics(thetalist,dthetalist,ddthetalist,g,Ftip,Mlist,Glist, \
+                    Slist):
 #Takes thetalist: n-vector of joint variables,
-#dthetalist: n-vector of joint rates,
-#ddthetalist: n-vector of joint accelerations,
-#g: Gravity vector g,
-#Ftip: Spatial force applied by the end-effector expressed in frame {n+1},
-#Mlist: List of link frames {i} relative to {i-1} at the home position,
-#Glist: Spatial inertia matrices Gi of the links,
-#Slist: Screw axes Si of the joints in a space frame.
-
+#      dthetalist: n-vector of joint rates,
+#      ddthetalist: n-vector of joint accelerations,
+#      g: Gravity vector g,
+#      Ftip: Spatial force applied by the end-effector expressed in frame 
+#            {n+1},
+#      Mlist: List of link frames {i} relative to {i-1} at the home 
+#             position,
+#      Glist: Spatial inertia matrices Gi of the links,
+#      Slist: Screw axes Si of the joints in a space frame.
 #Returns taulist: The n-vector of required joint forces/torques.
-#This function uses forward-backward Newton-Euler iterations to solve the equation:
-#taulist = Mlist(thetalist)ddthetalist + c(thetalist,dthetalist) + g(thetalist) + Jtr(thetalist)Ftip
+#This function uses forward-backward Newton-Euler iterations to solve the 
+#equation:
+#taulist = Mlist(thetalist)ddthetalist + c(thetalist,dthetalist) \
+#          + g(thetalist) + Jtr(thetalist)Ftip
     '''
 Example Input (3 Link Robot):
-thetalist = [0.1,0.1,0.1]
-dthetalist = [0.1,0.2,0.3]
-ddthetalist = [2,1.5,1]
-
-g = [0,0,-9.8]
-Ftip = [1,1,1,1,1,1]
-
-M01 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,0.,.089159,1.])).T
-M12 = np.array(([0.,0.,-1.,0.],[0.,1.,0.,0.],[1.,0.,0.,0.],[.28,.13585,0.,1.])).T
-M23 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,-.1197,.395,1])).T
-
-G1 = np.array(([.010267,0.,0.,0.,0.,0.],[0.,.010267,0.,0.,0.,0.],[0.,0.,.00666,0.,0.,0.],[0.,0.,0.,3.7,0.,0.],[0.,0.,0.,0.,3.7,0.],[0.,0.,0.,0.,0.,3.7]))
-G2 = np.array(([.22689,0.,0.,0.,0.,0.],[0.,.22689,0.,0.,0.,0.],[0.,0.,.0151074,0.,0.,0.],[0.,0.,0.,8.393,0.,0.],[0.,0.,0.,0.,8.393,0.],[0.,0.,0.,0.,0.,8.393]))
-G3 = np.array(([.0494433,0.,0.,0.,0.,0.],[0.,.0494433,0.,0.,0.,0.],[0.,0.,.004095,0.,0.,0.],[0.,0.,0.,2.275,0.,0.],[0.,0.,0.,0.,2.275,0.],[0.,0.,0.,0.,0.,2.275]))
-
-Glist = np.array((G1,G2,G3))
-Mlist = np.array((M01,M12,M23))
-
-Slist = np.array(([1.,0.,1.,0.,1.,0.],[0.,1.,0.,-.089,0.,0.],[0.,1.,0.,-.089,0.,.425]))
+thetalist = [0.1, 0.1, 0.1]
+dthetalist = [0.1, 0.2, 0.3]
+ddthetalist = [2, 1.5, 1]
+g = [0, 0, -9.8]
+Ftip = [1, 1, 1, 1, 1, 1]
+M01 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.089159], [0, 0, 0, 1]]
+M12 = [[0, 0, 1, 0.28], [0, 1, 0, 0.13585], [-1, 0, 0, 0],[0, 0, 0, 1]]
+M23 = [[1, 0, 0, 0], [0, 1, 0, -0.1197],[0, 0, 1, 0.395], [0, 0, 0, 1]]
+M34 = [[1, 0, 0, 0], [0, 1, 0, 0],[0, 0, 1, 0.14225], [0, 0, 0, 1]]
+G1 = np.diag([0.010267, 0.010267, 0.00666, 3.7, 3.7, 3.7])
+G2 = np.diag([0.22689, 0.22689, 0.0151074, 8.393, 8.393, 8.393])
+G3 = np.diag([0.0494433, 0.0494433, 0.004095, 2.275, 2.275, 2.275])
+Glist = [G1, G2, G3]
+Mlist = [M01, M12, M23, M34]
+Slist = np.array([[1, 0, 1,      0, 1,     0],
+                  [0, 1, 0, -0.089, 0,     0],
+                  [0, 1, 0, -0.089, 0, 0.425]]).T
 
 Output:
 [12.287409365123651, -20.555491300883507, -2.9403622930411073]
     '''
-    #******INITIALISATION********
-    n=len(Mlist)
-    Mi = Mlist[0]
-    Ai = [matmult(Adjoint(TransInv(Mi[0])),Slist[0])]
-    Ti = [matmult(Mlist[0],MatrixExp6(matmult(Ai[0],thetalist[0])))]
-    Vi=[]
-    Vi.append(matmult(Adjoint(TransInv(Ti[0])),[0,0,0,0,0,0])+matmult(Ai[0],dthetalist[0]))
-    Vdi =[]
-    Vdi.append(matmult(Adjoint(TransInv(Ti[0])),[0,0,0,-g[0],-g[1],-g[2]])+matmult(matmult(ad(Vi[0]),Ai[0]),dthetalist[0])+matmult(Ai[0],ddthetalist[0]))
-    #****************************
-    #*****Forward Iteration******
-    for i in range (1,n):
-        Mi = matmult(Mi[i-1],Mlist[i])
-        Ai.append(matmult(Adjoint(TransInv(Mi)),Slist[i]))
-        Ti.append(matmult(Mlist[i],MatrixExp6(matmult(Ai[i],thetalist[i]))))
-        Vi.append(matmult(Adjoint(TransInv(Ti[i])),Vi[i-1])+matmult(Ai[i],dthetalist[i]))
-        Vdi.append(matmult(Adjoint(TransInv(Ti[i])),Vdi[i-1])+matmult(matmult(ad(Vi[i]),Ai[i]),dthetalist[i])+matmult(Ai[i],ddthetalist[i]))
-    #****************************
-   
-    #******INITIALISATION********
-    Fi =[[None]]*(n)
-#    Fi[n-1] = matmult(np.array(Adjoint(TransInv(Mi[n]))).T,Ftip)+matmult(Glist[n-1],Vdi[n-1])-matmult(np.array(ad(Vi[n-1])).T,matmult(Vi[n-1],Glist[n-1]))
-    Fi[n-1] = np.array(matmult(np.array(Adjoint(TransInv(Mi[n]))).T,np.array(Ftip).T) + matmult(Glist[n-1],np.array(Vdi[n-1]).T) - matmult(np.array(ad(Vi[n-1])).T,matmult(Glist[n-1],np.array(Vi[n-1]).T))).T
-    taulist = [[None]]*(n)
-    taulist[n-1]=matmult(Fi[n-1],np.array(Ai[n-1]).T)
-    #****************************
-    #*****Backward Iteration*****
-    for i in range (n,1,-1):
-#        Fi[i-2] = matmult(np.array(Adjoint(TransInv(Ti[i-2]))).T,Ftip)+matmult(Glist[i-2],Vdi[i-2])-matmult(np.array(ad(Vi[i-2])).T,matmult(Vi[i-2],Glist[i-2]))
-	Fi[i-2] = np.array(matmult(np.array(Adjoint(TransInv(Ti[i-2]))).T,np.array(F[i-1]).T) + matmult(Glist[i-2],np.array(Vdi[i-2]).T) - matmult(np.array(ad(Vi[i-2])).T,matmult(Glist[i-2],np.array(Vi[i-2]).T))).T
-#        taulist[i-2]=matmult(np.array(Fi[i-2]).T,Ai[i-2])
-	taulist[i-2]=matmult(Fi[i-2],np.array(Ai[i-2]).T)
-    #****************************
-
+    n = len(thetalist)
+    Mi = np.eye(4)
+    Ai = np.zeros((6,n))
+    AdTi = [[None]]*(n + 1)
+    Vi = np.zeros((6,n + 1))
+    Vdi = np.zeros((6,n + 1))
+    Vdi[:,0] = np.r_[[0, 0, 0], -np.array(g)]
+    AdTi[n] = Adjoint(TransInv(Mlist[n]))
+    Fi = np.array(Ftip).copy()
+    taulist = [0] * n  
+    for i in range(n):
+        Mi = np.dot(Mi,Mlist[i])
+        Ai[:,i] = np.dot(Adjoint(TransInv(Mi)),Slist[:,i])
+        AdTi[i] = Adjoint(np.dot(MatrixExp6(VecTose3(Ai[:,i] * \
+                                            -thetalist[i])), \
+                                 TransInv(Mlist[i])))
+        Vi[:,i + 1] = np.dot(AdTi[i],Vi[:,i]) + Ai[:,i] * dthetalist[i]
+        Vdi[:,i + 1] = np.dot(AdTi[i],Vdi[:,i]) \
+                       + Ai[:,i] * ddthetalist[i] \
+                       + np.dot(ad(Vi[:,i + 1]),Ai[:,i]) * dthetalist[i]
+    for i in range (n-1,-1,-1):
+        Fi = np.dot(np.array(AdTi[i + 1]).T,Fi) \
+             + np.dot(Glist[i],Vdi[:,i + 1]) \
+             - np.dot(np.array(ad(Vi[:,i + 1])).T, \
+                      np.dot(Glist[i],Vi[:,i + 1]))
+	taulist[i] = np.dot(np.array(Fi).T,Ai[:,i])
     return taulist
 
-
-def MassMatrix(thetalist, Mlist, Glist, Slist):
+def MassMatrix(thetalist,Mlist,Glist,Slist):
 #Takes thetalist: A list of joint variables,
-#Mlist: List of link frames i relative to i-1 at the home position,
-#Glist: Spatial inertia matrices Gi of the links,
-#Slist: Screw axes Si of the joints in a space frame.
-
-#Returns M: The numerical inertia matrix M(thetalist) of an n-joint serial chain at the
-#given configuration thetalist.
-#This function calls InverseDynamics n times, each time passing a ddthetalist vector
-#with a single element equal to one and all other inputs set to zero. 
-#Each call of InverseDynamics generates a single column,
-#and these columns are assembled to create the inertia matrix.
+#      Mlist: List of link frames i relative to i-1 at the home position,
+#      Glist: Spatial inertia matrices Gi of the links,
+#      Slist: Screw axes Si of the joints in a space frame.
+#Returns M: The numerical inertia matrix M(thetalist) of an n-joint serial 
+#           chain at the given configuration thetalist.
+#This function calls InverseDynamics n times, each time passing a 
+#ddthetalist vector with a single element equal to one and all other inputs
+#set to zero. 
+#Each call of InverseDynamics generates a single column, and these columns 
+#are assembled to create the inertia matrix.
     '''
 Example Input (3 Link Robot):
-thetalist = [0.1,0.1,0.1]
-
-M01 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,0.,.089159,1.])).T
-M12 = np.array(([0.,0.,-1.,0.],[0.,1.,0.,0.],[1.,0.,0.,0.],[.28,.13585,0.,1.])).T
-M23 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,-.1197,.395,1])).T
-
-G1 = np.array(([.010267,0.,0.,0.,0.,0.],[0.,.010267,0.,0.,0.,0.],[0.,0.,.00666,0.,0.,0.],[0.,0.,0.,3.7,0.,0.],[0.,0.,0.,0.,3.7,0.],[0.,0.,0.,0.,0.,3.7]))
-G2 = np.array(([.22689,0.,0.,0.,0.,0.],[0.,.22689,0.,0.,0.,0.],[0.,0.,.0151074,0.,0.,0.],[0.,0.,0.,8.393,0.,0.],[0.,0.,0.,0.,8.393,0.],[0.,0.,0.,0.,0.,8.393]))
-G3 = np.array(([.0494433,0.,0.,0.,0.,0.],[0.,.0494433,0.,0.,0.,0.],[0.,0.,.004095,0.,0.,0.],[0.,0.,0.,2.275,0.,0.],[0.,0.,0.,0.,2.275,0.],[0.,0.,0.,0.,0.,2.275]))
-
-Glist = np.array((G1,G2,G3))
-Mlist = np.array((M01,M12,M23))
-
-Slist = np.array(([1.,0.,1.,0.,1.,0.],[0.,1.,0.,-.089,0.,0.],[0.,1.,0.,-.089,0.,.425]))
+thetalist = [0.1, 0.1, 0.1]
+M01 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.089159], [0, 0, 0, 1]]
+M12 = [[0, 0, 1, 0.28], [0, 1, 0, 0.13585], [-1, 0, 0, 0],[0, 0, 0, 1]]
+M23 = [[1, 0, 0, 0], [0, 1, 0, -0.1197],[0, 0, 1, 0.395], [0, 0, 0, 1]]
+M34 = [[1, 0, 0, 0], [0, 1, 0, 0],[0, 0, 1, 0.14225], [0, 0, 0, 1]]
+G1 = np.diag([0.010267, 0.010267, 0.00666, 3.7, 3.7, 3.7])
+G2 = np.diag([0.22689, 0.22689, 0.0151074, 8.393, 8.393, 8.393])
+G3 = np.diag([0.0494433, 0.0494433, 0.004095, 2.275, 2.275, 2.275])
+Glist = [G1, G2, G3]
+Mlist = [M01, M12, M23, M34]
+Slist = np.array([[1, 0, 1,      0, 1,     0],
+                  [0, 1, 0, -0.089, 0,     0],
+                  [0, 1, 0, -0.089, 0, 0.425]]).T
 
 Output:
 [[3.0865629109397004, -0.28598437110125424, -0.0071842639094406753],
@@ -769,18 +761,16 @@ Output:
  [0.0, 0.0, 0.19163085751427505]]
 
     '''
-    n = len(Mlist)
-    dthetalist = [0]*n
-    g = (0,0,0)
-    Ftip = [0]*6
-    M = []
+    n = len(thetalist)
+    M = np.zeros((n,n))
+    dthetalist = [0] * n
     for i in range (n):
-        ddthetalist = [0]*n
-        ddthetalist[i]=1
-        M.append(InverseDynamics(thetalist, dthetalist, ddthetalist, g, Ftip, Mlist, Glist, Slist))
-    M = np.array(M).T
+        ddthetalist = [0] * n
+        ddthetalist[i] = 1
+        M[:,i] = InverseDynamics(thetalist,dthetalist,ddthetalist, \
+                                 [0, 0, 0],[0, 0, 0, 0, 0, 0], Mlist, \
+                                 Glist,Slist)
     return M
-
 
 def VelQuadraticForces(thetalist, dthetalist, Mlist, Glist, Slist):
 #Takes thetalist: A list of joint variables,

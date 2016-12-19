@@ -26,11 +26,12 @@ Change the Jacobian of both Body and Space from using loop in loop to using only
 
 Note:
 The introductions including the examples of all Log and Exp should be changed.
+The ex about inverseDynamics should be checked. Not changed yet.
 
 Book typos:
 P114: MatrixLog6(T) misses 6
 P106: Algorithm descriptions differ in (b) and (c)
-
+P293: The definition of the variables in inverse dynamics, row or column?
 
 
 How to change lines: 

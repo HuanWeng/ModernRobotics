@@ -1,4 +1,4 @@
-#WARMINGIN: These softwares are under construction. They are not usable right now!
+#Version 1.0. Some high-level functions in Python under debugging.
 
 # Modern Robotics:  Mechanics, Planning, and Control
 # Code Library

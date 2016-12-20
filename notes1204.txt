@@ -3,23 +3,28 @@ Nearzero: Added to all of them as a basic helper function
 array problem begin at AxisAng3
 Rewrite all the log and exp.
 Check the variable names which should match with those in roblib.pdf file
-input of blist or thetalist in nb. use transpose
 The dimension of thetamat is confusing in the textbook.
 Skip the last two functions of ch8.
+The last chapter left.
+ForwardDynamicsTrajectory: The last taulist not used. dt useless?
+ForwardDynamicsTrajectory proves to be true.
+InverseDynamicsTrajectory uses functions from ch9 to make inputs of example. others: ch11
 
 Not quite sure about ScrewToAxis.
 
 Matlab:
 Delete Magnitude and replace it by norm()
-
+"100" left in simulatecontrol 
 
 Mathematica:
 Sometimes no need to add return
-
+input of blist or thetalist in nb. use transpose
+Round[] for the integration number
 
 Python:
 All notes marked as #?
 Seems all coloumn vector outputs show as row vector but they really are coloumn
+The sign usage in ComputeTorque in ch11
 
 For algorithm:
 Change the inputs/outputs of MatrixLog and MatrixExp (4 functions totally).

@@ -715,6 +715,8 @@ Output:
         AdTi[i] = Adjoint(np.dot(MatrixExp6(VecTose3(Ai[:,i] * \
                                             -thetalist[i])), \
                                  TransInv(Mlist[i])))
+        print i
+        print np.array(dthetalist[i]).shape
         Vi[:,i + 1] = np.dot(AdTi[i],Vi[:,i]) + Ai[:,i] * dthetalist[i]
         Vdi[:,i + 1] = np.dot(AdTi[i],Vdi[:,i]) \
                        + Ai[:,i] * ddthetalist[i] \
@@ -945,21 +947,23 @@ dthetalistNext:
     return thetalist + dt * np.array(dthetalist), \
            dthetalist + dt * np.array(ddthetalist)
 
-def InverseDynamicsTrajectory(thetamat, dthetamat, ddthetamat, g, Ftipmat, Mlist, Glist, Slist):
+def InverseDynamicsTrajectory(thetamat,dthetamat,ddthetamat,g,Ftipmat, \
+                              Mlist,Glist,Slist):
 #Takes thetamat: An N x n matrix of robot joint variables,
-#dthetamat: An N x n matrix of robot joint velocities,
-#ddthetamat: An N x n matrix of robot joint accelerations,
-#g: Gravity vector g,
-#Ftipmat: An N x 6 matrix of spatial forces applied by the end-effector (If there are no tip
-#forces the user should input a zero and a zero matrix will be used),
-#Mlist: List of link frames i relative to i-1 at the home position,
-#Glist: Spatial inertia matrices Gi of the links,
-#Slist: Screw axes Si of the joints in a space frame.
-
-#Returns taumat: The N x n matrix of joint forces/torques for the specified trajectory, where each of
-#the N rows is the vector of joint forces/torques at each time step.
-#This function uses InverseDynamics to calculate the joint forces/torques required to move the
-#serial chain along the given trajectory.
+#      dthetamat: An N x n matrix of robot joint velocities,
+#      ddthetamat: An N x n matrix of robot joint accelerations,
+#      g: Gravity vector g,
+#      Ftipmat: An N x 6 matrix of spatial forces applied by the 
+#               end-effector (If there are no tip forces the user should
+#               input a zero and a zero matrix will be used),
+#      Mlist: List of link frames i relative to i-1 at the home position,
+#      Glist: Spatial inertia matrices Gi of the links,
+#      Slist: Screw axes Si of the joints in a space frame.
+#Returns taumat: The N x n matrix of joint forces/torques for the specified
+#trajectory, where each of the N rows is the vector of joint forces/torques
+#at each time step.
+#This function uses InverseDynamics to calculate the joint forces/torques 
+#required to move the serial chain along the given trajectory.
     '''
 #Example Inputs (3 Link Robot):
 from math import pi
@@ -967,83 +971,81 @@ import numpy as np
 import robot_calc_functions as r
 import matplotlib.pyplot as plt
 #Create a trajectory to follow using functions from Chapter 9
-thetastart =[0,0,0]
-thetaend =[pi/2,pi/2,pi/2]
+thetastart =[0, 0, 0]
+thetaend =[pi/2, pi/2, pi/2]
 Tf = 3
 N= 1000
 method = 5 
-traj = r.JointTrajectory(thetastart, thetaend, Tf, N, method)
-thetamat = []
-dthetamat = []
-ddthetamat = []
-dt = Tf/(N-1.0)
-for i in range(0,len(traj)):
-    thetamat.append(traj[i])
-    dthetamat.append((thetamat[i]-thetamat[i-1])/dt)
-    ddthetamat.append((dthetamat[i]-dthetamat[i-1])/dt)
+traj = JointTrajectory(thetastart,thetaend,Tf,N,method)
+thetamat = np.array(traj).copy()
+dthetamat = np.zeros((3,1000))
+ddthetamat = np.zeros((3,1000))
+dt = Tf / (N - 1.0)
+for i in range(np.array(traj).shape[1] - 1):
+    dthetamat[:,i + 1] = (thetamat[:,i + 1] - thetamat[:,i]) / dt
+    ddthetamat[:,i + 1] = (dthetamat[:,i + 1] - dthetamat[:,i]) / dt
 #Initialise robot descripstion (Example with 3 links)
-g = [0,0,-9.8]
-Ftipmat = [[1,1,1,1,1,1]]*N
-M01 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,0.,.089159,1.])).T
-M12 = np.array(([0.,0.,-1.,0.],[0.,1.,0.,0.],[1.,0.,0.,0.],[.28,.13585,0.,1.])).T
-M23 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,-.1197,.395,1])).T
-Mlist = np.array((M01,M12,M23))
-G1 = np.array(([.010267,0.,0.,0.,0.,0.],[0.,.010267,0.,0.,0.,0.],[0.,0.,.00666,0.,0.,0.],[0.,0.,0.,3.7,0.,0.],[0.,0.,0.,0.,3.7,0.],[0.,0.,0.,0.,0.,3.7]))
-G2 = np.array(([.22689,0.,0.,0.,0.,0.],[0.,.22689,0.,0.,0.,0.],[0.,0.,.0151074,0.,0.,0.],[0.,0.,0.,8.393,0.,0.],[0.,0.,0.,0.,8.393,0.],[0.,0.,0.,0.,0.,8.393]))
-G3 = np.array(([.0494433,0.,0.,0.,0.,0.],[0.,.0494433,0.,0.,0.,0.],[0.,0.,.004095,0.,0.,0.],[0.,0.,0.,2.275,0.,0.],[0.,0.,0.,0.,2.275,0.],[0.,0.,0.,0.,0.,2.275]))
-Glist = np.array((G1,G2,G3))
-Slist = np.array(([1.,0.,1.,0.,0.23,0.1],[0.,1.,1.,-.089,0.,0.2],[0.,1.,0.,-.089,0.,.425]))
-taumat = r.InverseDynamicsTrajectory(thetamat, dthetamat, ddthetamat, g, Ftipmat, Mlist, Glist, Slist)
-
+g = [0, 0, -9.8]
+Ftipmat = np.ones((6,N))
+M01 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.089159], [0, 0, 0, 1]]
+M12 = [[0, 0, 1, 0.28], [0, 1, 0, 0.13585], [-1, 0, 0, 0],[0, 0, 0, 1]]
+M23 = [[1, 0, 0, 0], [0, 1, 0, -0.1197],[0, 0, 1, 0.395], [0, 0, 0, 1]]
+M34 = [[1, 0, 0, 0], [0, 1, 0, 0],[0, 0, 1, 0.14225], [0, 0, 0, 1]]
+G1 = np.diag([0.010267, 0.010267, 0.00666, 3.7, 3.7, 3.7])
+G2 = np.diag([0.22689, 0.22689, 0.0151074, 8.393, 8.393, 8.393])
+G3 = np.diag([0.0494433, 0.0494433, 0.004095, 2.275, 2.275, 2.275])
+Glist = [G1, G2, G3]
+Mlist = [M01, M12, M23, M34]
+Slist = np.array([[1, 0, 1,      0, 1,     0],
+                  [0, 1, 0, -0.089, 0,     0],
+                  [0, 1, 0, -0.089, 0, 0.425]]).T
+taumat = InverseDynamicsTrajectory(thetamat,dthetamat,ddthetamat,g, \
+                                   Ftipmat,Mlist,Glist,Slist)
 #Output using matplotlib to plot the joint forces/torques
-Tau1 = []
-Tau2 = []
-Tau3 = []
-
-for i in range(0,len(taumat)):
-    Tau1.append(taumat[i][0])
-    Tau2.append(taumat[i][1])
-    Tau3.append(taumat[i][2])
+Tau1 = taumat[0,:]
+Tau2 = taumat[1,:]
+Tau3 = taumat[2,:]
 timestamp = np.linspace(0,Tf,N)
 plt.plot(timestamp, Tau1, label = "Tau1")
 plt.plot(timestamp, Tau2, label = "Tau2")
 plt.plot(timestamp, Tau3, label = "Tau3")
-plt.ylim (-12,12)
+plt.ylim (-40,120)
 plt.legend(loc = 'lower right')
 plt.xlabel("Time")
 plt.ylabel("Torque")
 plt.title("Plot of Torque Trajectories")
 plt.show()
     '''
-    taumat = []
-    if Ftipmat == 0:
-        NewFtipmat = [[0,0,0,0,0,0]]*len(thetamat)
-    else:
-        NewFtipmat = Ftipmat;
-    for i in range(len(thetamat)):
-        taumat.append(InverseDynamics(thetamat[i], dthetamat[i], ddthetamat[i], g, NewFtipmat[i], Mlist, Glist, Slist))
+    taumat = np.array(thetamat).copy()
+    for i in range(np.array(thetamat).shape[1]):
+        taumat[:,i] \
+        = InverseDynamics(thetamat[:,i],dthetamat[:,i],ddthetamat[:,i],g, \
+                          Ftipmat[:,i],Mlist,Glist,Slist)
     return taumat
 
-
-def ForwardDynamicsTrajectory(thetalist, dthetalist, taumat, g, Ftipmat, Mlist, Glist, Slist, dt, intRes):
+def ForwardDynamicsTrajectory(thetalist,dthetalist,taumat,g,Ftipmat, \
+                              Mlist,Glist,Slist,dt,intRes):
 #Takes thetalist: n-vector of initial joint variables,
-#dthetalist: n-vector of initial joint rates,
-#taumat: An N x n matrix of joint forces/torques, where each row is the joint effort at any time step,
-#g: Gravity vector g,
-#Ftipmat: An N x 6 matrix of spatial forces applied by the end-effector (If there are no tip
-#forces the user should input a zero and a zero matrix will be used),
-#Mlist: List of link frames {i} relative to {i-1} at the home position,
-#Glist: Spatial inertia matrices Gi of the links,
-#Slist: Screw axes Si of the joints in a space frame,
-#dt: The timestep between consecutive joint forces/torques,
-#intRes: Integration resolution is the number of times integration (Euler) takes places
-#between each time step. Must be an integer value greater than or equal to 1
-
-#Returns thetamat: The N x n matrix of robot joint angles resulting from the 
-#specified joint forces/torques,
-#dthetamat: The N x n matrix of robot joint velocities.
-#This function simulates the motion of a serial chain given an open-loop history 
-#of joint forces/torques.
+#      dthetalist: n-vector of initial joint rates,
+#      taumat: An N x n matrix of joint forces/torques, where each row is 
+#              the joint effort at any time step,
+#      g: Gravity vector g,
+#      Ftipmat: An N x 6 matrix of spatial forces applied by the 
+#               end-effector (If there are no tip forces the user should 
+#               input a zero and a zero matrix will be used),
+#      Mlist: List of link frames {i} relative to {i-1} at the home 
+#             position,
+#      Glist: Spatial inertia matrices Gi of the links,
+#      Slist: Screw axes Si of the joints in a space frame,
+#      dt: The timestep between consecutive joint forces/torques,
+#      intRes: Integration resolution is the number of times integration 
+#              (Euler) takes places between each time step. Must be an 
+#              integer value greater than or equal to 1
+#Returns thetamat: The N x n matrix of robot joint angles resulting from 
+#                  the specified joint forces/torques,
+#        dthetamat: The N x n matrix of robot joint velocities.
+#This function simulates the motion of a serial chain given an open-loop
+#history of joint forces/torques.
 #It calls a numerical integration procedure that uses ForwardDynamics.
     '''
 #Example Inputs (3 Link Robot):
@@ -1051,45 +1053,43 @@ from math import pi
 import numpy as np
 import robot_calc_functions as r
 import matplotlib.pyplot as plt
-thetalist = [0.1,0.1,0.1]
-dthetalist = [0.1,0.2,0.3]
-taumat = [[3.63,-6.58,-5.57], [3.74,-5.55,-5.5], [4.31,-0.68,-5.19],[5.18,5.63,-4.31],[5.85,8.17,-2.59],[5.78,2.79,-1.7 ],[4.99,-5.3 ,-1.19],[4.08,-9.41,0.07],[3.56,-10.1,0.97],[3.49,-9.41,1.23]]
-
+thetalist = [0.1, 0.1, 0.1]
+dthetalist = [0.1, 0.2, 0.3]
+taumat = np.array([[3.63, -6.58, -5.57], [3.74, -5.55, -5.5], 
+                   [4.31, -0.68, -5.19], [5.18, 5.63, -4.31],
+                   [5.85, 8.17, -2.59], [5.78, 2.79, -1.7], 
+                   [4.99, -5.3, -1.19], [4.08, -9.41, 0.07],
+                   [3.56, -10.1, 0.97], [3.49, -9.41, 1.23]]).T
 #Initialise robot description (Example with 3 links)
-g = [0,0,-9.8]
-Ftipmat = [[1,1,1,1,1,1]]*len(taumat)
-M01 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,0.,.089159,1.])).T
-M12 = np.array(([0.,0.,-1.,0.],[0.,1.,0.,0.],[1.,0.,0.,0.],[.28,.13585,0.,1.])).T
-M23 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,-.1197,.395,1])).T
-G1 = np.array(([.010267,0.,0.,0.,0.,0.],[0.,.010267,0.,0.,0.,0.],[0.,0.,.00666,0.,0.,0.],[0.,0.,0.,3.7,0.,0.],[0.,0.,0.,0.,3.7,0.],[0.,0.,0.,0.,0.,3.7]))
-G2 = np.array(([.22689,0.,0.,0.,0.,0.],[0.,.22689,0.,0.,0.,0.],[0.,0.,.0151074,0.,0.,0.],[0.,0.,0.,8.393,0.,0.],[0.,0.,0.,0.,8.393,0.],[0.,0.,0.,0.,0.,8.393]))
-G3 = np.array(([.0494433,0.,0.,0.,0.,0.],[0.,.0494433,0.,0.,0.,0.],[0.,0.,.004095,0.,0.,0.],[0.,0.,0.,2.275,0.,0.],[0.,0.,0.,0.,2.275,0.],[0.,0.,0.,0.,0.,2.275]))
-
-Glist = np.array((G1,G2,G3))
-Mlist = np.array((M01,M12,M23))
-Slist = np.array(([1.,0.,1.,0.,1.,0.],[0.,1.,0.,-.089,0.,0.],[0.,1.,0.,-.089,0.,.425]))
+g = [0, 0, -9.8]
+Ftipmat = np.ones((6,np.array(taumat).shape[1]))
+M01 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.089159], [0, 0, 0, 1]]
+M12 = [[0, 0, 1, 0.28], [0, 1, 0, 0.13585], [-1, 0, 0, 0],[0, 0, 0, 1]]
+M23 = [[1, 0, 0, 0], [0, 1, 0, -0.1197],[0, 0, 1, 0.395], [0, 0, 0, 1]]
+M34 = [[1, 0, 0, 0], [0, 1, 0, 0],[0, 0, 1, 0.14225], [0, 0, 0, 1]]
+G1 = np.diag([0.010267, 0.010267, 0.00666, 3.7, 3.7, 3.7])
+G2 = np.diag([0.22689, 0.22689, 0.0151074, 8.393, 8.393, 8.393])
+G3 = np.diag([0.0494433, 0.0494433, 0.004095, 2.275, 2.275, 2.275])
+Glist = [G1, G2, G3]
+Mlist = [M01, M12, M23, M34]
+Slist = np.array([[1, 0, 1,      0, 1,     0],
+                  [0, 1, 0, -0.089, 0,     0],
+                  [0, 1, 0, -0.089, 0, 0.425]]).T
 dt = 0.1
 intRes = 8
-
-thetamat, dthetamat = r.ForwardDynamicsTrajectory(thetalist, dthetalist, taumat, g, Ftipmat, Mlist, Glist, Slist, dt, intRes)
-
+thetamat,dthetamat \
+= ForwardDynamicsTrajectory(thetalist,dthetalist,taumat,g,Ftipmat,Mlist, \
+                            Glist,Slist,dt,intRes)
 #Output using matplotlib to plot the joint angle/velocities
 import matplotlib.pyplot as plt
-theta1 = []
-theta2 = []
-theta3 = []
-dtheta1 = []
-dtheta2 = []
-dtheta3 = []
-for i in range(0,len(thetamat)):
-    theta1.append(thetamat[i][0])
-    theta2.append(thetamat[i][1])
-    theta3.append(thetamat[i][2])
-    dtheta1.append(dthetamat[i][0])
-    dtheta2.append(dthetamat[i][1])
-    dtheta3.append(dthetamat[i][2])
-N = len(thetamat)
-Tf = len(taumat)*dt
+theta1 = thetamat[0,:]
+theta2 = thetamat[1,:]
+theta3 = thetamat[2,:]
+dtheta1 = dthetamat[0,:]
+dtheta2 = dthetamat[1,:]
+dtheta3 = dthetamat[2,:]
+N = np.array(taumat).shape[1]
+Tf = np.array(taumat).shape[1]*dt
 timestamp = np.linspace(0,Tf,N)
 plt.plot(timestamp, theta1, label = "Theta1")
 plt.plot(timestamp, theta2, label = "Theta2")
@@ -1104,23 +1104,19 @@ plt.ylabel("Joint Angles/Velocities")
 plt.title("Plot of Joint Angles and Joint Velocities")
 plt.show()
     '''
-    if intRes < 1 or isinstance(intRes, float):
-        print "Integration resolution must be an integer value greater than zero."
-        return
-    if Ftipmat == 0:
-        NewFtipmat = [[0,0,0,0,0,0]]*len(taumat)
-    else:
-        NewFtipmat = Ftipmat;
-    thetamat = []
-    thetamat.append(thetalist)
-    dthetamat = []
-    dthetamat.append(dthetalist)
-    for i in range(len(taumat)):        
+    thetamat = taumat.copy()
+    thetamat[:,0] = thetalist
+    dthetamat = taumat.copy()
+    dthetamat[:,0] = dthetalist
+    for i in range(np.array(taumat).shape[1] - 1):        
         for j in range(intRes):
-            ddthetalist = ForwardDynamics(thetalist, dthetalist, taumat[i], g, NewFtipmat[i], Mlist, Glist, Slist)
-            thetalist,dthetalist = EulerStep(thetalist,dthetalist,ddthetalist,(dt/intRes))
-        thetamat.append(thetalist)
-        dthetamat.append(dthetalist)
+            ddthetalist \
+            = ForwardDynamics(thetalist,dthetalist,taumat[:,i],g, \
+                              Ftipmat[:,i],Mlist,Glist,Slist)
+            thetalist,dthetalist = EulerStep(thetalist,dthetalist, \
+                                             ddthetalist,dt / intRes)
+        thetamat[:,i + 1] = thetalist
+        dthetamat[:,i + 1] = dthetalist
     return thetamat, dthetamat
 
 '''
@@ -1156,80 +1152,67 @@ Output:
     '''
     return 10 * (t / Tf) ** 3 - 15 * (t / Tf) ** 4 + 6 * (t / Tf) ** 5
 
-def JointTrajectory(thetastart, thetaend, Tf, N, method):
+def JointTrajectory(thetastart,thetaend,Tf,N,method):
 #Takes thetastart: The initial joint variables,
-#thetaend: The final joint variables,
-#Tf: Total time of the motion in seconds from rest to rest,
-#N: The number of points N > 1 (Start and stop) in the discrete representation of the trajectory,
-#method: The time-scaling method, where 3 indicates cubic (third-order polynomial) time scaling
-#and 5 indicates quintic (fifth-order polynomial) time scaling.
-
-#Returns traj: A trajectory as an N x n matrix, where each row is an n-vector of joint variables at an
-#instant in time. The first row is thetastart and the Nth row is thetaend . The elapsed time between
-#each row is Tf/(N - 1).
+#      thetaend: The final joint variables,
+#      Tf: Total time of the motion in seconds from rest to rest,
+#      N: The number of points N > 1 (Start and stop) in the discrete
+#         representation of the trajectory,
+#      method: The time-scaling method, where 3 indicates cubic 
+#              (third-order polynomial) time scaling and 5 indicates
+#              quintic (fifth-order polynomial) time scaling.
+#Returns traj: A trajectory as an N x n matrix, where each row is an 
+#              n-vector of joint variables at an instant in time. The first
+#              row is thetastart and the Nth row is thetaend . The elapsed 
+#              time between each row is Tf/(N - 1).
 #The returned trajectory is a straight-line motion in joint space.
-#Animation example can be seen at https://www.youtube.com/watch?v=fVElSuS1GgI
+#Animation example can be seen at 
+#https://www.youtube.com/watch?v=fVElSuS1GgI
     '''
 Example Input: 
-thetastart = [1,0,0,1,1,0.2,0,1]
-thetaend = [1.2,0.5,0.6,1.1,2,2,0.9,1]
+thetastart = [1, 0, 0, 1, 1, 0.2, 0,1]
+thetaend = [1.2, 0.5, 0.6, 1.1, 2, 2, 0.9, 1]
 Tf = 4
 N = 6
 method = 3
 Output:
-[[ 1.    ,  0.    ,  0.    ,  1.    ,  1.    ,  0.2   ,  0.    ,  1.    ],
- [ 1.0208,  0.052 ,  0.0624,  1.0104,  1.104 ,  0.3872,  0.0936,  1.    ],
- [ 1.0704,  0.176 ,  0.2112,  1.0352,  1.352 ,  0.8336,  0.3168,  1.    ],
- [ 1.1296,  0.324 ,  0.3888,  1.0648,  1.648 ,  1.3664,  0.5832,  1.    ],
- [ 1.1792,  0.448 ,  0.5376,  1.0896,  1.896 ,  1.8128,  0.8064,  1.    ],
- [ 1.2   ,  0.5   ,  0.6   ,  1.1   ,  2.    ,  2.    ,  0.9   ,  1.    ]]
+[[ 1.      1.0208  1.0704  1.1296  1.1792  1.2   ]
+ [ 0.      0.052   0.176   0.324   0.448   0.5   ]
+ [ 0.      0.0624  0.2112  0.3888  0.5376  0.6   ]
+ [ 1.      1.0104  1.0352  1.0648  1.0896  1.1   ]
+ [ 1.      1.104   1.352   1.648   1.896   2.    ]
+ [ 0.2     0.3872  0.8336  1.3664  1.8128  2.    ]
+ [ 0.      0.0936  0.3168  0.5832  0.8064  0.9   ]
+ [ 1.      1.      1.      1.      1.      1.    ]]
     '''
-    #Check required method
-    if (method != 3 and method != 5):
-            print "Please input either 3 or 5 for the time scaling method"
-            return
-    #Check that N has enough points
-    if (N < 2):
-            print "Please input a bigger N"
-            return
-    #Check that thestart and thetaend are the same size
-    if (len(thetastart)!=len(thetaend)):
-            print "Please enter a theta start the same size as your theta end"
-            return
-    #Convert to floats
-    Tf += 0.0
-    N += 0.0
-
-    timegap = Tf/(N-1)#difference in time between each point
-    traj=[]#empty array to store joint angles
-    
-    curr_time=0
-    while(curr_time<=Tf):
-        if(method==3):#Cubic
-            traj.append(np.add(matmult(1-CubicTimeScaling(Tf, curr_time), thetastart),(matmult(CubicTimeScaling(Tf, curr_time),thetaend))))
-        else:#Quintic
-            traj.append(np.add(matmult(1-QuinticTimeScaling(Tf, curr_time), thetastart),(matmult(QuinticTimeScaling(Tf, curr_time),thetaend))))
-        curr_time += timegap
-            
-    traj = np.asarray(traj)
+    timegap = Tf / (N - 1.0)
+    traj = np.zeros((len(thetastart),N))
+    for i in range(N):
+        if method == 3:
+            s = CubicTimeScaling(Tf, timegap * i)
+        else:
+            s = QuinticTimeScaling(Tf, timegap * i)                
+        traj[:,i] = s * np.array(thetaend) + (1 - s) * np.array(thetastart)
     return traj
 
-
-def ScrewTrajectory(Xstart, Xend, Tf, N, method):
+def ScrewTrajectory(Xstart,Xend,Tf,N,method):
 #Takes Xstart: The initial end-effector configuration,
-#Xend: The final end-effector configuration,
-#Tf: Total time of the motion in seconds from rest to rest,
-#N: The number of points N > 1 (Start and stop) in the discrete representation of the trajectory,
-#method: The time-scaling method, where 3 indicates cubic (third-order polynomial) time scaling
-#and 5 indicates quintic (fifth-order polynomial) time scaling.
-
-#Returns traj: The discretized trajectory as a list of N matrices in SE(3) separated in 
-#time by Tf/(N-1). The first in the list is Xstart and the Nth is Xend .
-#This function calculates a trajectory corresponding to the screw motion about a space screw axis.
+#      Xend: The final end-effector configuration,
+#      Tf: Total time of the motion in seconds from rest to rest,
+#      N: The number of points N > 1 (Start and stop) in the discrete
+#         representation of the trajectory,
+#      method: The time-scaling method, where 3 indicates cubic 
+#              (third-order polynomial) time scaling and 5 indicates 
+#              quintic (fifth-order polynomial) time scaling.
+#Returns traj: The discretized trajectory as a list of N matrices in SE(3) 
+#              separated in time by Tf/(N-1). The first in the list is 
+#              Xstart and the Nth is Xend .
+#This function calculates a trajectory corresponding to the screw motion 
+#about a space screw axis.
     '''
 Example Input: 
-Xstart = [[1,0,0,1],[0,1,0,0],[0,0,1,1],[0,0,0,1]]
-Xend = [[0,0,1,0.1],[1,0,0,0],[0,1,0,4.1],[0,0,0,1]]
+Xstart = [[1, 0, 0, 1], [0, 1, 0, 0], [0, 0, 1, 1], [0, 0, 0, 1]]
+Xend = [[0, 0, 1, 0.1], [1, 0, 0, 0], [0, 1, 0, 4.1], [0, 0, 0, 1]]
 Tf = 5
 N = 4
 method = 3
@@ -1254,39 +1237,19 @@ Output:
   [ 0.     1.    -0.     4.1  ]
   [ 0.     0.     0.     1.   ]]]
     '''
-    #Check required method
-    if (method != 3 and method != 5):
-            print "Please input either 3 or 5 for the time scaling method"
-            return
-    #Check that N has enough points
-    if (N < 2):
-            print "Please input a bigger N"
-            return
-    #Check that Xstart and Xend are the same size
-    if (len(Xstart)!=len(Xend)):
-            print "Please enter a Xstart the same size as your Xend"
-            return
-
-    #Convert to floats
-    Tf += 0.0
-    N += 0.0
-
-    timegap = Tf/(N-1)#difference in time between each point
-    traj=[]#empty array to store trajectory
-
-    curr_time=0
-    while(curr_time<=Tf):
-        if(method==3):#Cubic
-            traj.append(matmult(Xstart,MatrixExp6(matmult(MatrixLog6(matmult(TransInv(Xstart),Xend)),CubicTimeScaling(Tf, curr_time)))))
-        else:#Quintic
-            traj.append(matmult(Xstart,MatrixExp6(matmult(MatrixLog6(matmult(TransInv(Xstart),Xend)),QuinticTimeScaling(Tf, curr_time)))))
-        curr_time += timegap
-            
-    traj = np.asarray(traj)
+    timegap = Tf / (N - 1.0)
+    traj = [[None]] * N
+    for i in range(N):
+        if method == 3:
+            s = CubicTimeScaling(Tf, timegap * i)
+        else:
+            s = QuinticTimeScaling(Tf, timegap * i)                
+        traj[i] \
+        = np.dot(Xstart,MatrixExp6(MatrixLog6(np.dot(TransInv(Xstart), \
+                                                     Xend)) * s))
     return traj
 
-
-def CartesianTrajectory(Xstart, Xend, Tf, N, method):
+def CartesianTrajectory(Xstart,Xend,Tf,N,method):
 #Takes Xstart: The initial end-effector configuration,
 #Xend: The final end-effector configuration,
 #Tf: Total time of the motion in seconds from rest to rest,
@@ -1327,96 +1290,65 @@ Output:
   [ 0.     1.    -0.     4.1  ]
   [ 0.     0.     0.     1.   ]]]
     '''
-    #Check required method
-    if (method != 3 and method != 5):
-            print "Please input either 3 or 5 for the time scaling method"
-            return
-    #Check that N has enough points
-    if (N < 2):
-            print "Please input a bigger N"
-            return
-    #Check that Xstart and Xend are the same size
-    if (len(Xstart)!=len(Xend)):
-            print "Please enter a Xstart the same size as your Xend"
-            return
-
-    #Convert to floats
-    Tf += 0.0
-    N += 0.0
-
-    timegap = Tf/(N-1)#difference in time between each point
-    traj=[]#empty array to store trajectory
-
-    #Separate the Rotational motion and the straight line
-    Rstart, Pstart = TransToRp(Xstart)
-    Rend, Pend = TransToRp(Xend)
-
-    curr_time=0
-    while(curr_time<=Tf):
-        if(method==3):#Cubic
-            Pcurrent = np.add(matmult((1-CubicTimeScaling(Tf, curr_time)),Pstart), (matmult(CubicTimeScaling(Tf,curr_time),Pend)))
-            Rcurrent = (matmult(Rstart,MatrixExp3(matmult(MatrixLog3(matmult(RotInv(Rstart),Rend)),CubicTimeScaling(Tf, curr_time)))))            
-        else:#Quintic
-            Pcurrent = np.add(matmult(1-QuinticTimeScaling(Tf, curr_time), Pstart),(matmult(QuinticTimeScaling(Tf, curr_time),Pend)))
-            Rcurrent = (matmult(Rstart,MatrixExp3(matmult(MatrixLog3(matmult(RotInv(Rstart),Rend)),QuinticTimeScaling(Tf, curr_time)))))
-        
-        #Put R and P back together and add it to the matrix
-        traj.append(RpToTrans(Rcurrent, Pcurrent))
-        curr_time += timegap
-            
-    traj = np.asarray(traj)
+    timegap = Tf / (N - 1.0)
+    traj = [[None]] * N
+    Rstart, pstart = TransToRp(Xstart)
+    Rend, pend = TransToRp(Xend)
+    for i in range(N):
+        if method == 3:
+            s = CubicTimeScaling(Tf, timegap * i)
+        else:
+            s = QuinticTimeScaling(Tf, timegap * i)                
+        traj[i] \
+        = np.r_[np.c_[np.dot(Rstart, \
+        MatrixExp3(MatrixLog3(np.dot(np.array(Rstart).T,Rend)) * s)), \
+                      s * np.array(pend) + (1 - s) * np.array(pstart)], \
+                [[0, 0, 0, 1]]]
     return traj
 
-
-
-
-
 '''
-**********************************************************************************************
-********************************  CHAPTER 11: ROBOT CONTROL  *********************************
-**********************************************************************************************
+*** CHAPTER 11: ROBOT CONTROL ***
 '''
-def ComputedTorque(thetalist,dthetalist,eint,g,Mlist,Glist,Slist,thetalistd,dthetalistd,ddthetalistd,Kp,Ki,Kd):
+
+def ComputedTorque(thetalist,dthetalist,eint,g,Mlist,Glist,Slist, \
+                   thetalistd,dthetalistd,ddthetalistd,Kp,Ki,Kd):
 #Takes thetalist: n-vector of joint variables,
-#dthetalist: n-vector of joint rates,
-#eint: n-vector of the time-integral of joint errors,
-#g: Gravity vector g,
-#Mlist: List of link frames {i} relative to {i-1} at the home position,
-#Glist: Spatial inertia matrices Gi of the links,
-#Slist: Screw axes Si of the joints in a space frame,
-#thetalistd: n-vector of reference joint variables,
-#dthetalistd: n-vector of reference joint velocities,
-#ddthetalistd: n-vector of reference joint accelerations,
-#Kp: The feedback proportional gain (identical for each joint),
-#Ki: The feedback integral gain (identical for each joint),
-#Kd: The feedback derivative gain (identical for each joint).
-
+#      dthetalist: n-vector of joint rates,
+#      eint: n-vector of the time-integral of joint errors,
+#      g: Gravity vector g,
+#      Mlist: List of link frames {i} relative to {i-1} at the home 
+#             position,
+#      Glist: Spatial inertia matrices Gi of the links,
+#      Slist: Screw axes Si of the joints in a space frame,
+#      thetalistd: n-vector of reference joint variables,
+#      dthetalistd: n-vector of reference joint velocities,
+#      ddthetalistd: n-vector of reference joint accelerations,
+#      Kp: The feedback proportional gain (identical for each joint),
+#      Ki: The feedback integral gain (identical for each joint),
+#      Kd: The feedback derivative gain (identical for each joint).
 #Returns taulist: The vector of joint forces/torques computed by the 
-#feedback linearizing controller at the current instant.
+#                 feedback linearizing controller at the current instant.
     '''
 Example Input: 
-thetalist = [0.1,0.1,0.1]
-dthetalist = [0.1,0.2,0.3]
-eint = [0.2,0.2,0.2]
-g = [0,0,-9.8]
-
-M01 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,0.,.089159,1.])).T
-M12 = np.array(([0.,0.,-1.,0.],[0.,1.,0.,0.],[1.,0.,0.,0.],[.28,.13585,0.,1.])).T
-M23 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,-.1197,.395,1])).T
-
-G1 = np.array(([.010267,0.,0.,0.,0.,0.],[0.,.010267,0.,0.,0.,0.],[0.,0.,.00666,0.,0.,0.],[0.,0.,0.,3.7,0.,0.],[0.,0.,0.,0.,3.7,0.],[0.,0.,0.,0.,0.,3.7]))
-G2 = np.array(([.22689,0.,0.,0.,0.,0.],[0.,.22689,0.,0.,0.,0.],[0.,0.,.0151074,0.,0.,0.],[0.,0.,0.,8.393,0.,0.],[0.,0.,0.,0.,8.393,0.],[0.,0.,0.,0.,0.,8.393]))
-G3 = np.array(([.0494433,0.,0.,0.,0.,0.],[0.,.0494433,0.,0.,0.,0.],[0.,0.,.004095,0.,0.,0.],[0.,0.,0.,2.275,0.,0.],[0.,0.,0.,0.,2.275,0.],[0.,0.,0.,0.,0.,2.275]))
-
-Glist = np.array((G1,G2,G3))
-Mlist = np.array((M01,M12,M23))
-
-Slist = np.array(([1.,0.,1.,0.,0.23,0.1],[0.,1.,1.,-.089,0.,0.2],[0.,1.,0.,-.089,0.,.425]))
-
-thetalistd = [1,1,1]
-dthetalistd = [2,1.2,2]
-ddthetalistd = [0.1,0.1,0.1]
-
+thetalist = [0.1, 0.1, 0.1]
+dthetalist = [0.1, 0.2, 0.3]
+eint = [0.2, 0.2, 0.2]
+g = [0, 0, -9.8]
+M01 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.089159], [0, 0, 0, 1]]
+M12 = [[0, 0, 1, 0.28], [0, 1, 0, 0.13585], [-1, 0, 0, 0],[0, 0, 0, 1]]
+M23 = [[1, 0, 0, 0], [0, 1, 0, -0.1197],[0, 0, 1, 0.395], [0, 0, 0, 1]]
+M34 = [[1, 0, 0, 0], [0, 1, 0, 0],[0, 0, 1, 0.14225], [0, 0, 0, 1]]
+G1 = np.diag([0.010267, 0.010267, 0.00666, 3.7, 3.7, 3.7])
+G2 = np.diag([0.22689, 0.22689, 0.0151074, 8.393, 8.393, 8.393])
+G3 = np.diag([0.0494433, 0.0494433, 0.004095, 2.275, 2.275, 2.275])
+Glist = [G1, G2, G3]
+Mlist = [M01, M12, M23, M34]
+Slist = np.array([[1, 0, 1,      0, 1,     0],
+                  [0, 1, 0, -0.089, 0,     0],
+                  [0, 1, 0, -0.089, 0, 0.425]]).T
+thetalistd = [1, 1, 1]
+dthetalistd = [2, 1.2, 2]
+ddthetalistd = [0.1, 0.1, 0.1]
 Kp = 1.3
 Ki = 1.2
 Kd = 1.1
@@ -1425,162 +1357,141 @@ Output:
 [ 7.44175458  1.32493661 -4.81808147]
     '''
     e = np.subtract(thetalistd,thetalist)
-    eder = np.subtract(dthetalistd,dthetalist)
-
-    M = MassMatrix(thetalist,Mlist,Glist,Slist)
-    c = VelQuadraticForces(thetalist,dthetalist,Mlist,Glist,Slist)
-    grav = GravityForces(thetalist,g,Mlist,Glist,Slist)
-
-    taulist = matmult(M,((ddthetalistd + matmult(Kp,e) + matmult(Ki,eint) + matmult(Kd,eder)))) + c + grav
-
-    return taulist
 
 
-def SimulateControl(thetalist,dthetalist,g,Ftipmat,Mlist,Glist,Slist,thetamatd,dthetamatd,ddthetamatd,gtilde,Mtildelist,Gtildelist,Kp,Ki,Kd,dt,intRes):
+
+    print np.array(Kp * e + Kd * np.subtract(dthetalistd,dthetalist)).shape
+
+    return np.dot(MassMatrix(thetalist,Mlist,Glist,Slist), \
+                  Kp * e + Ki * np.array(np.array(eint).T + e).T \
+                  + Kd * np.subtract(dthetalistd,dthetalist)) \
+           + InverseDynamics(thetalist,dthetalist,ddthetalistd,g, \
+                             [0, 0, 0, 0, 0, 0],Mlist,Glist,Slist)
+
+def SimulateControl(thetalist,dthetalist,g,Ftipmat,Mlist,Glist,Slist, \
+                    thetamatd,dthetamatd,ddthetamatd,gtilde,Mtildelist, \
+                    Gtildelist,Kp,Ki,Kd,dt,intRes):
 #Takes thetalist: n-vector of initial joint variables,
-#dthetalist: n-vector of initial joint velocities,
-#g: Actual gravity vector g,
-#Ftipmat: An N x 6 matrix of spatial forces applied by the end-effector (If there are no tip
-#forces the user should input a zero and a zero matrix will be used),
-#Mlist: Actual list of link frames i relative to i-1 at the home position,
-#Glist: Actual spatial inertia matrices Gi of the links,
-#Slist: Screw axes Si of the joints in a space frame,
-#thetamatd: An Nxn matrix of desired joint variables from the reference trajectory,
-#dthetamatd: An Nxn matrix of desired joint velocities,
-#ddthetamatd: An Nxn matrix of desired joint accelerations,
-#gtilde: The (possibly incorrect) model of the gravity vector,
-#Mtildelist: The (possibly incorrect) model of the link frame locations,
-#Gtildelist: The (possibly incorrect) model of the link spatial inertias,
-#Kp: The feedback proportional gain (identical for each joint),
-#Ki: The feedback integral gain (identical for each joint),
-#Kd: The feedback derivative gain (identical for each joint),
-#dt: The timestep between points on the reference trajectory.
-#intRes: Integration resolution is the number of times integration (Euler) takes places
-#between each time step. Must be an integer value greater than or equal to 1.
-
-#Returns taumat: An Nxn matrix of the controllers commanded joint forces/torques, where each row
-#of n forces/torques corresponds to a single time instant,
-#thetamat: An Nxn matrix of actual joint angles.
-#The end of this function plots all the actual and desired joint angles using
-#matplotlib and random libraries.
+#      dthetalist: n-vector of initial joint velocities,
+#      g: Actual gravity vector g,
+#      Ftipmat: An N x 6 matrix of spatial forces applied by the 
+#               end-effector (If there are no tip forces the user should 
+#               input a zero and a zero matrix will be used),
+#      Mlist: Actual list of link frames i relative to i-1 at the home 
+#             position,
+#      Glist: Actual spatial inertia matrices Gi of the links,
+#      Slist: Screw axes Si of the joints in a space frame,
+#      thetamatd: An Nxn matrix of desired joint variables from the 
+#                 reference trajectory,
+#      dthetamatd: An Nxn matrix of desired joint velocities,
+#      ddthetamatd: An Nxn matrix of desired joint accelerations,
+#      gtilde: The (possibly incorrect) model of the gravity vector,
+#      Mtildelist: The (possibly incorrect) model of the link frame 
+#                  locations,
+#      Gtildelist: The (possibly incorrect) model of the link spatial 
+#                  inertias,
+#      Kp: The feedback proportional gain (identical for each joint),
+#      Ki: The feedback integral gain (identical for each joint),
+#      Kd: The feedback derivative gain (identical for each joint),
+#      dt: The timestep between points on the reference trajectory.
+#      intRes: Integration resolution is the number of times integration 
+#              (Euler) takes places between each time step. Must be an 
+#              integer value greater than or equal to 1.
+#Returns taumat: An Nxn matrix of the controllers commanded joint 
+#                forces/torques, where each row of n forces/torques 
+#                corresponds to a single time instant,
+#        thetamat: An Nxn matrix of actual joint angles.
+#The end of this function plots all the actual and desired joint angles 
+#using matplotlib and random libraries.
     '''
 #Example Input: 
 from math import pi
 import numpy as np
 import robot_calc_functions as r
-thetalist = [0.1,0.1,0.1]
-dthetalist = [0.1,0.2,0.3]
-
+thetalist = [0.1, 0.1, 0.1]
+dthetalist = [0.1, 0.2, 0.3]
 #Initialise robot description (Example with 3 links)
 g = [0,0,-9.8]
-
-M01 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,0.,.089159,1.])).T
-M12 = np.array(([0.,0.,-1.,0.],[0.,1.,0.,0.],[1.,0.,0.,0.],[.28,.13585,0.,1.])).T
-M23 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,-.1197,.395,1])).T
-
-G1 = np.array(([.010267,0.,0.,0.,0.,0.],[0.,.010267,0.,0.,0.,0.],[0.,0.,.00666,0.,0.,0.],[0.,0.,0.,3.7,0.,0.],[0.,0.,0.,0.,3.7,0.],[0.,0.,0.,0.,0.,3.7]))
-G2 = np.array(([.22689,0.,0.,0.,0.,0.],[0.,.22689,0.,0.,0.,0.],[0.,0.,.0151074,0.,0.,0.],[0.,0.,0.,8.393,0.,0.],[0.,0.,0.,0.,8.393,0.],[0.,0.,0.,0.,0.,8.393]))
-G3 = np.array(([.0494433,0.,0.,0.,0.,0.],[0.,.0494433,0.,0.,0.,0.],[0.,0.,.004095,0.,0.,0.],[0.,0.,0.,2.275,0.,0.],[0.,0.,0.,0.,2.275,0.],[0.,0.,0.,0.,0.,2.275]))
-
-Glist = np.array((G1,G2,G3))
-Mlist = np.array((M01,M12,M23))
-
-Slist = np.array(([1.,0.,1.,0.,1.,0.],[0.,1.,0.,-.089,0.,0.],[0.,1.,0.,-.089,0.,.425]))
+M01 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.089159], [0, 0, 0, 1]]
+M12 = [[0, 0, 1, 0.28], [0, 1, 0, 0.13585], [-1, 0, 0, 0],[0, 0, 0, 1]]
+M23 = [[1, 0, 0, 0], [0, 1, 0, -0.1197],[0, 0, 1, 0.395], [0, 0, 0, 1]]
+M34 = [[1, 0, 0, 0], [0, 1, 0, 0],[0, 0, 1, 0.14225], [0, 0, 0, 1]]
+G1 = np.diag([0.010267, 0.010267, 0.00666, 3.7, 3.7, 3.7])
+G2 = np.diag([0.22689, 0.22689, 0.0151074, 8.393, 8.393, 8.393])
+G3 = np.diag([0.0494433, 0.0494433, 0.004095, 2.275, 2.275, 2.275])
+Glist = [G1, G2, G3]
+Mlist = [M01, M12, M23, M34]
+Slist = np.array([[1, 0, 1,      0, 1,     0],
+                  [0, 1, 0, -0.089, 0,     0],
+                  [0, 1, 0, -0.089, 0, 0.425]]).T
 dt = 0.01
-
 #Create a trajectory to follow
-thetaend =[pi/2,pi,1.5*pi]
+thetaend =[pi/2.0,pi,1.5*pi]
 Tf = 1
 N = (Tf/dt)
-
 method = 5
-traj = r.JointTrajectory(thetalist, thetaend, Tf, N, method)
-thetamatd = [thetalist]
-dthetamatd = [dthetalist]
-ddthetamatd = [0,0,0]
-
-for i in range(1,len(traj)):
-    thetamatd.append(traj[i])
-    dthetamatd.append((thetamatd[i]-thetamatd[i-1])/dt)
-    ddthetamatd.append((dthetamatd[i]-dthetamatd[i-1])/dt)
-
+traj = JointTrajectory(thetalist, thetaend, Tf, N, method)
+thetamatd = np.array(traj).copy()
+dthetamatd = np.zeros((3,N))
+ddthetamatd = np.zeros((3,N))
+dt = Tf / (N - 1.0)
+for i in range(np.array(traj).shape[1] - 1):
+    dthetamatd[:,i + 1] = (thetamatd[:,i + 1] - thetamatd[:,i]) / dt
+    ddthetamatd[:,i + 1] = (dthetamatd[:,i + 1] - dthetamatd[:,i]) / dt
 #Possibly wrong robot description (Example with 3 links)
 gtilde = [0.8,0.2,-8.8]
-
-Mhat01 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,0.,.1,1.])).T
-Mhat12 = np.array(([0.,0.,-1.,0.],[0.,1.,0.,0.],[1.,0.,0.,0.],[.3,.2,0.,1.])).T
-Mhat23 = np.array(([1.,0.,0.,0.],[0.,1.,0.,0.],[0.,0.,1.,0.],[0.,-.2,.4,1])).T
-
-Gtilde1 = np.array(([.1,0.,0.,0.,0.,0.],[0.,.1,0.,0.,0.,0.],[0.,0.,.1,0.,0.,0.],[0.,0.,0.,4.0,0.,0.],[0.,0.,0.,0.,4.0,0.],[0.,0.,0.,0.,0.,3.0]))
-Gtilde2 = np.array(([.3,0.,0.,0.,0.,0.],[0.,.3,0.,0.,0.,0.],[0.,0.,.1,0.,0.,0.],[0.,0.,0.,9.0,0.,0.],[0.,0.,0.,0.,9.5,0.],[0.,0.,0.,0.,0.,8.0]))
-Gtilde3 = np.array(([.1,0.,0.,0.,0.,0.],[0.,.1,0.,0.,0.,0.],[0.,0.,.01,0.,0.,0.],[0.,0.,0.,3.0,0.,0.],[0.,0.,0.,0.,1.5,0.],[0.,0.,0.,0.,0.,2.0]))
-
-Gtildelist = np.array((Gtilde1,Gtilde2,Gtilde3))
-Mtildelist = np.array((Mhat01,Mhat12,Mhat23))
-
-Ftipmat = [[1,1,1,1,1,1]]*len(traj)
-
+Mhat01 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.1], [0, 0, 0, 1]]
+Mhat12 = [[0, 0, 1, 0.3], [0, 1, 0, 0.2], [-1, 0, 0, 0],[0, 0, 0, 1]]
+Mhat23 = [[1, 0, 0, 0], [0, 1, 0, -0.2],[0, 0, 1, 0.4], [0, 0, 0, 1]]
+Mhat34 = [[1, 0, 0, 0], [0, 1, 0, 0],[0, 0, 1, 0.2], [0, 0, 0, 1]]
+Ghat1 = np.diag([0.1, 0.1, 0.1, 4, 4, 4])
+Ghat2 = np.diag([0.3, 0.3, 0.1, 9, 9, 9])
+Ghat3 = np.diag([0.1, 0.1, 0.1, 3, 3, 3])
+Gtildelist = [Ghat1, Ghat2, Ghat3]
+Mtildelist = [Mhat01, Mhat12, Mhat23, Mhat34]
+Ftipmat = [[1,1,1,1,1,1]]*np.array(traj).shape[1]
 Kp = 20
 Ki = 10
 Kd = 18
 intRes = 8
-
-taumat,thetamat = r.SimulateControl(thetalist,dthetalist,g,Ftipmat,Mlist,Glist,Slist,thetamatd,dthetamatd,ddthetamatd,gtilde,Mtildelist,Gtildelist,Kp,Ki,Kd,dt,intRes)
+taumat,thetamat \
+= SimulateControl(thetalist,dthetalist,g,Ftipmat,Mlist,Glist,Slist, \
+                  thetamatd,dthetamatd,ddthetamatd,gtilde,Mtildelist, \
+                  Gtildelist,Kp,Ki,Kd,dt,intRes)
     '''
-    n = len(thetamatd)
-    if Ftipmat == 0:
-        NewFtipmat = [[0,0,0,0,0,0]]*n
-    else:
-        NewFtipmat = Ftipmat;
-    thetacurrent = thetalist
-    dthetacurrent = dthetalist
-    eint = 0
-    taumat = []
-    thetamat = []
-    taulist = ComputedTorque(thetacurrent,dthetacurrent,eint,gtilde,Mtildelist,Gtildelist,Slist,thetamatd[0],dthetamatd[0],ddthetamatd[0],Kp,Ki,Kd)
-    for j in range (0,intRes):
-        ddthetalist = ForwardDynamics(thetacurrent,dthetacurrent,taulist,g,NewFtipmat[0],Mlist,Glist,Slist)
-        thetacurrent,dthetacurrent = EulerStep(thetacurrent,dthetacurrent,ddthetalist,(dt/intRes))
-        taumat.append(taulist)
-        thetamat.append(thetacurrent)
-    eint = eint + matmult(dt,np.subtract(thetamatd[0], thetacurrent))
-
-    for i in range (1,n):
-       taulist = ComputedTorque(thetacurrent,dthetacurrent,eint,gtilde,Mtildelist,Gtildelist,Slist,thetamatd[i],dthetamatd[i],ddthetamatd[i],Kp,Ki,Kd)
-       for j in range (0,intRes):
-           ddthetalist = ForwardDynamics(thetacurrent,dthetacurrent,taulist,g,NewFtipmat[i],Mlist,Glist,Slist)
-           thetacurrent,dthetacurrent = EulerStep(thetacurrent,dthetacurrent,ddthetalist,(dt/intRes))
-           taumat.append(taulist)
-           thetamat.append(thetacurrent)
-       eint = eint + matmult(dt,np.subtract(thetamatd[i], thetacurrent))
-
+    n = np.array(thetamatd).shape[1]
+    thetacurrent = np.array(thetalist).copy()
+    dthetacurrent = np.array(dthetalist).copy()
+    eint = np.zeros((np.array(thetamatd).shape[0],1))
+    taumat = np.zeros(np.array(thetamatd).shape)
+    thetamat = np.zeros(np.array(thetamatd).shape)
+    for i in range(n):
+       taulist \
+       = ComputedTorque(thetacurrent,dthetacurrent,eint,gtilde, \
+                        Mtildelist,Gtildelist,Slist,thetamatd[:,i], \
+                        dthetamatd[:,i],ddthetamatd[:,i],Kp,Ki,Kd)
+       for j in range(intRes):
+           ddthetalist \
+           = ForwardDynamics(thetacurrent,dthetacurrent,taulist,g, \
+                             Ftipmat[:,i],Mlist,Glist,Slist)
+           thetacurrent,dthetacurrent \
+           = EulerStep(thetacurrent,dthetacurrent,ddthetalist,(dt/intRes))
+    taumat[:,i] = taulist
+    thetamat[:,i] = thetacurrent
+    eint = np.add(eint,dt * np.subtract(thetamatd[:,i], thetacurrent))
     #Output using matplotlib to plot
-    links  = len(thetamat[0])
-    plotAngles =  [[None]*(len(thetamat)) for _ in range(links)]
-    plotAnglesd =  [[None]*(len(thetamatd)) for _ in range(links)]
-
-    for i in range(0,len(thetamat)):
-        for j in range(0,links):
-            plotAngles[j][i] = thetamat[i][j]
-
-    for i in range(0,len(thetamatd)):
-        for j in range(0,links):
-            plotAnglesd[j][i] = thetamatd[i][j]
-
-    N = len(thetamat)
-    Tf = len(taumat)*dt
+    links  = np.array(thetamat).shape[0]
+    N = np.array(thetamat).shape[1]
+    Tf = N*dt
     timestamp = np.linspace(0,Tf,N)
     timestampd = np.linspace(0,Tf,(N/intRes))
-
-    for i in range(0,links):
+    for i in range(links):
         col=[random.uniform(0,1),random.uniform(0,1),random.uniform(0,1)]
-        plt.plot(timestamp, plotAngles[i],"-",color=col, label = ("ActualTheta"+str(i+1)))
-        plt.plot(timestampd, plotAnglesd[i],".",color=col, label = ("DesiredTheta"+str(i+1)))
-
+        plt.plot(timestamp, thetamat[i],"-",color=col, label = ("ActualTheta"+str(i+1)))
+        plt.plot(timestampd, thetamatd[i],".",color=col, label = ("DesiredTheta"+str(i+1)))
     plt.legend(loc = 'upper left')
     plt.xlabel("Time")
     plt.ylabel("Joint Angles")
     plt.title("Plot of Actual and Desired Joint Angles")
     plt.show()
-        
     return (taumat,thetamat)

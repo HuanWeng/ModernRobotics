@@ -6,8 +6,8 @@ function T = FKinBody(M,Blist,thetalist)
 %       Blist: The joint screw axes in the end-effector frame when the 
 %              manipulator is at the home position,
 %       thetalist: A list of joint coordinates.
-% Returns T (SE(3)) representing the end-effector frame 
-% when the joints are at the specified coordinates (i.t.o Body Frame).
+% Returns T in SE(3) representing the end-effector frame when the joints 
+% are at the specified coordinates (i.t.o Body Frame).
 % Example Inputs:
 %{
   clear;clc;

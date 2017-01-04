@@ -11,7 +11,6 @@ function JTFtip = EndEffectorForces(thetalist,Ftip,Mlist,Glist,Slist)
 %                 end-effector force Ftip.
 % This function calls InverseDynamics with g = 0, dthetalist = 0, and 
 % ddthetalist = 0.
-%
 % Example Input (3 Link Robot):
 %{
   clear;clc;
@@ -33,9 +32,10 @@ function JTFtip = EndEffectorForces(thetalist,Ftip,Mlist,Glist,Slist)
 %}
 % Output:
 % JTFtip =
-%    2.8226    1.5305    1.6826
+%    1.4095
+%    1.8577
+%    1.3924
 n = size(thetalist,1);
 JTFtip = InverseDynamics(thetalist,zeros(n,1),zeros(n,1),[0; 0; 0], ...
                          Ftip,Mlist,Glist,Slist);
 end
-

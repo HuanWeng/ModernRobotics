@@ -29,16 +29,16 @@ function taumat ...
   method = 5 ;
   traj = JointTrajectory(thetastart,thetaend,Tf,N,method);
   thetamat = traj;
-  dthetamat = zeros(3,1000);
-  ddthetamat = zeros(3,1000);
+  dthetamat = zeros(1000,3);
+  ddthetamat = zeros(1000,3);
   dt = Tf / (N-1);
   for i = 1:N - 1
-      dthetamat(:,i + 1) = (thetamat(:,i + 1)-thetamat(:,i)) / dt;
-      ddthetamat(:,i + 1) = (dthetamat(:,i + 1)-dthetamat(:,i)) / dt;
+      dthetamat(i + 1,:) = (thetamat(i + 1,:)-thetamat(i,:)) / dt;
+      ddthetamat(i + 1,:) = (dthetamat(i + 1,:)-dthetamat(i,:)) / dt;
   end
   %Initialise robot descripstion (Example with 3 links)
   g = [0; 0; -9.8];
-  Ftipmat = ones(6,N); 
+  Ftipmat = ones(N,6); 
   M01 = [[1, 0, 0, 0]; [0, 1, 0, 0]; [0, 0, 1, 0.089159]; [0, 0, 0, 1]];
   M12 = [[0, 0, 1, 0.28]; [0, 1, 0, 0.13585]; [-1, 0 ,0, 0]; [0, 0, 0, 1]];
   M23 = [[1, 0, 0, 0]; [0, 1, 0, -0.1197]; [0, 0, 1, 0.395]; [0, 0, 0, 1]];
@@ -55,20 +55,24 @@ function taumat ...
                                      Ftipmat,Mlist,Glist,Slist);
   %Output using matplotlib to plot the joint forces/torques
   time=0:dt:Tf;
-  plot(time,taumat(1,:),'b')
+  plot(time,taumat(:,1),'b')
   hold on
-  plot(time,taumat(2,:),'g')
-  plot(time,taumat(3,:),'r')
+  plot(time,taumat(:,2),'g')
+  plot(time,taumat(:,3),'r')
   title('Plot for Torque Trajectories')
   xlabel('Time')
   ylabel('Torque')
   legend('Tau1','Tau2','Tau3')
 %}
+thetamat = thetamat';
+dthetamat = dthetamat';
+ddthetamat = ddthetamat';
+Ftipmat = Ftipmat';
 taumat = thetamat;
 for i = 1:size(thetamat,2)
    taumat(:,i) ...
    = InverseDynamics(thetamat(:,i),dthetamat(:,i),ddthetamat(:,i),g, ...
                      Ftipmat(:,i),Mlist,Glist,Slist);
 end
+taumat = taumat';
 end
-

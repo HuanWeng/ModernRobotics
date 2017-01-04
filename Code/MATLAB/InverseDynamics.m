@@ -17,7 +17,6 @@ function taulist = InverseDynamics(thetalist,dthetalist,ddthetalist,g, ...
 % equation:
 % taulist = Mlist(thetalist)ddthetalist + c(thetalist,dthetalist) ...
 %           + g(thetalist) + Jtr(thetalist)Ftip
-%
 % Example Input (3 Link Robot):
 %{ 
   clear;clc;

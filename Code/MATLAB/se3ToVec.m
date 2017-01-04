@@ -2,7 +2,7 @@
 
 function V = se3ToVec(se3mat)
 % Takes se3mat a 4x4 se(3) matrix
-% Returns the corresponding 6-vector (representing spatial velocity)
+% Returns the corresponding 6-vector (representing spatial velocity).
 % Example Input:
 %{
   clear;clc;
@@ -19,4 +19,3 @@ function V = se3ToVec(se3mat)
 %     6
 V = [se3mat(3,2); se3mat(1,3); se3mat(2,1); se3mat(1:3,4)];
 end
-

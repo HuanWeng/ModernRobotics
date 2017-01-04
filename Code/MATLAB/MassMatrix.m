@@ -9,10 +9,8 @@ function M = MassMatrix(thetalist,Mlist,Glist,Slist)
 %            chain at the given configuration thetalist.
 % This function calls InverseDynamics n times, each time passing a 
 % ddthetalist vector with a single element equal to one and all other 
-% inputs set to zero. 
-% Each call of InverseDynamics generates a single column, and these columns
-% are assembled to create the inertia matrix.
-%
+% inputs set to zero. Each call of InverseDynamics generates a single 
+% column, and these columns are assembled to create the inertia matrix.
 % Example Input (3 Link Robot):
 %{
   clear;clc;
@@ -33,9 +31,9 @@ function M = MassMatrix(thetalist,Mlist,Glist,Slist)
 %}
 % Output:
 % M =
-%    3.0866   -0.2860   -0.0072
-%         0    0.8849    0.4322
-%         0         0    0.1916
+%   22.5433   -0.3071   -0.0072
+%   -0.3071    1.9685    0.4322
+%   -0.0072    0.4322    0.1916
 n = size(thetalist,1);
 M = zeros(n);
 dthetalist = zeros(n,1);

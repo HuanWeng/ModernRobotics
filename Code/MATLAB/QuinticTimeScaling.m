@@ -2,7 +2,7 @@
 
 function s = QuinticTimeScaling(Tf,t)
 % Takes Tf: Total time of the motion in seconds from rest to rest,
-%       t: The current time t satisfying 0<t<Tf.
+%       t: The current time t satisfying 0 < t < Tf.
 % Returns s: The path parameter s(t) corresponding to a fifth-order
 %            polynomial motion that begins and ends at zero velocity and 
 %            zero acceleration.

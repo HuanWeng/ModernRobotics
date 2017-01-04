@@ -1,0 +1,12 @@
+Doubts: 
+MatrixExp3: The 4th line in the comment. Is that necessary? What is the meaning of the first word?
+MatrixExp6: The 4th line in the comment. Is that necessary? What is the meaning of the first word?
+IKinBody: Comment difference with that shown in pdf. 
+IKinSpace: Comment difference with that shown in pdf. 
+InverseDynamics: The former example currently used given non-zero velocities, accelerations and forces and moments. Is that weird? Because usually forces and accelerations cannnot be non-zero at the same time.  
+JointTrajectory: Comments include Animation example and the link. Needed?
+CartesianTrajectory: Comments include Animation example and the link. Needed?
+ComputedTorque: The first two inputs are different with the names in the function, is it for the purpose of easy understanding?
+SimulateControl: The first two inputs are different with the names in the function, is it for the purpose of easy understanding?
+ForwardDynamicsTrajectory: The last taulist in taumat not used. Because the position and velocity of the next motion step are calculated using the torques at current motion step, so the torques at the last motion step are not used. Is that reasonable? 
+ScrewToAxis: The name of the function may be reworded because this function not include the situation when the motion is simplified into a linear movement.

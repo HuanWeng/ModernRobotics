@@ -1,7 +1,7 @@
 %*** CHAPTER 3: RIGID-BODY MOTIONS ***
 
 function invT = TransInv(T)
-% Takes T a transformation matrix 
+% Takes a transformation matrix T.
 % Returns its inverse. 
 % Uses the structure of transformation matrices to avoid taking a matrix
 % inverse, for efficiency.
@@ -18,6 +18,5 @@ function invT = TransInv(T)
 %     0    -1     0     0
 %     0     0     0     1
 [R, p] = TransToRp(T);
-invT = [R', -1 * R' * p; 0, 0, 0, 1];
+invT = [R', -R' * p; 0, 0, 0, 1];
 end
-

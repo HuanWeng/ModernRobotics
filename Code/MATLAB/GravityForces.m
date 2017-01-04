@@ -10,7 +10,6 @@ function grav = GravityForces(thetalist,g,Mlist,Glist,Slist)
 %               thetalist
 % This function calls InverseDynamics with Ftip = 0, dthetalist = 0, and 
 % ddthetalist = 0.
-%
 % Example Input (3 Link Robot):
 %{
   clear;clc;
@@ -32,7 +31,9 @@ function grav = GravityForces(thetalist,g,Mlist,Glist,Slist)
 %}
 % Output:
 % grav =
-%    3.2917  -22.8137   -5.4416
+%   28.4033
+%  -37.6409
+%   -5.4416
 n = size(thetalist,1);
 dthetalist = zeros(n,1);
 ddthetalist = zeros(n,1);

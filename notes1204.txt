@@ -1,44 +1,45 @@
-Magnitude in all of them seems unnecessary.
-Nearzero: Added to all of them as a basic helper function
-array problem begin at AxisAng3
-Rewrite all the log and exp.
-Check the variable names which should match with those in roblib.pdf file
-The dimension of thetamat is confusing in the textbook.
-Skip the last two functions of ch8.
-The last chapter left.
-ForwardDynamicsTrajectory: The last taulist not used. dt useless?
-ForwardDynamicsTrajectory proves to be true.
-InverseDynamicsTrajectory uses functions from ch9 to make inputs of example. others: ch11
+1Magnitude in all of them seems unnecessary.                                                      
+1Nearzero: Added to all of them as a basic helper function                                        
+1array problem begin at AxisAng3
+1Rewrite all the log and exp.
+1Check the variable names which should match with those in roblib.pdf file
+1The dimension of thetamat is confusing in the textbook.
+1Skip the last two functions of ch8.
+1The last chapter left.
+?ForwardDynamicsTrajectory: The last taulist not used. dt useless?
+1ForwardDynamicsTrajectory proves to be true.
+1InverseDynamicsTrajectory uses functions from ch9 to make inputs of example. others: ch11:  explanations needed to help to input
 
-Not quite sure about ScrewToAxis.
+0Not quite sure about ScrewToAxis.
+check on the name of the function
 
 Matlab:
-Delete Magnitude and replace it by norm()
-"100" left in simulatecontrol 
+1Delete Magnitude and replace it by norm()
+1"100" left in simulatecontrol 
 
 Mathematica:
-Sometimes no need to add return
-input of blist or thetalist in nb. use transpose
-Round[] for the integration number
+1Sometimes no need to add return
+1input of blist or thetalist in nb. use transpose
+1Round[] for the integration number
 
 Python:
-All notes marked as #?
-Seems all coloumn vector outputs show as row vector but they really are coloumn
-The sign usage in ComputeTorque in ch11
+1All notes marked as #?
+1Seems all coloumn vector outputs show as row vector but they really are coloumn
+1The sign usage in ComputeTorque in ch11
 
 For algorithm:
-Change the inputs/outputs of MatrixLog and MatrixExp (4 functions totally).
-Change the Jacobian of both Body and Space from using loop in loop to using only one loop.
+1Change the inputs/outputs of MatrixLog and MatrixExp (4 functions totally).
+1Change the Jacobian of both Body and Space from using loop in loop to using only one loop.
 
 
 Note:
-The introductions including the examples of all Log and Exp should be changed.
-The ex about inverseDynamics should be checked. Not changed yet.
+1The introductions including the examples of all Log and Exp should be changed.
+1The ex about inverseDynamics should be checked. Not changed yet.
 
 Book typos:
-P114: MatrixLog6(T) misses 6
-P106: Algorithm descriptions differ in (b) and (c)
-P293: The definition of the variables in inverse dynamics, row or column?
+1P114: MatrixLog6(T) misses 6
+1P106: Algorithm descriptions differ in (b) and (c)
+1P293: The definition of the variables in inverse dynamics, row or column?
 
 
 How to change lines: 
@@ -47,4 +48,9 @@ Matlab:  xxxxxxxxxxxxxxxx...,
 
 What if output is nearzero? right now it is ignored without any explanation
 
+
 Python: (xxxxxxxxxxxxxx)           XXXXXXXXXXX\
+
+
+how to represent the variables: col or row, 2D matrix
+1Check with an example with just force, no dynamics,

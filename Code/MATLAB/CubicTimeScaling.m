@@ -2,9 +2,9 @@
 
 function s = CubicTimeScaling(Tf,t)
 % Takes Tf: Total time of the motion in seconds from rest to rest,
-%       t: The current time t satisfying 0<t<Tf.
+%       t: The current time t satisfying 0 < t < Tf.
 % Returns s: The path parameter s(t) corresponding to a third-order 
-%            polynomial motion that begins and ends at zero velocity
+%            polynomial motion that begins and ends at zero velocity.
 % Example Input: 
 %{
   clear;clc;
@@ -17,4 +17,3 @@ function s = CubicTimeScaling(Tf,t)
 %    0.2160
 s = 3 * (t / Tf) ^ 2 - 2 * (t / Tf) ^ 3;
 end
-

@@ -1,9 +1,9 @@
 %*** CHAPTER 5: VELOCITY KINEMATICS AND STATICS ***
 
 function Js = JacobianSpace(Slist,thetalist)
-% Takes Slist: The joint screw axes in the space frame 
-% when the manipulator is at the home position,
-% thetalist: A list of joint coordinates. 
+% Takes Slist: The joint screw axes in the space frame when the manipulator
+%              is at the home position,
+%       thetalist: A list of joint coordinates. 
 % Returns the corresponding space Jacobian (6xn real numbers).
 % Example Input:
 %{

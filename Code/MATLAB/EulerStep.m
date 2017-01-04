@@ -1,17 +1,15 @@
 %*** CHAPTER 8: DYNAMICS OF OPEN CHAINS ***
 
-function [thetalistNext, dthetalistNext] = EulerStep(thetalist, ...
-                                                     dthetalist, ...
-                                                     ddthetalist,dt)
+function [thetalistNext, dthetalistNext] ...
+         = EulerStep(thetalist,dthetalist,ddthetalist,dt)
 % Takes thetalist: n-vector of joint variables,
 %       dthetalist: n-vector of joint rates,
 %       ddthetalist: n-vector of joint accelerations,
-%       dt: The timestep delta t 
+%       dt: The timestep delta t.
 % Returns thetalistNext: Vector of joint variables after dt from first 
-%                        order Euler integration.
+%                        order Euler integration,
 %         dthetalistNext: Vector of joint rates after dt from first order 
 %                         Euler integration.
-%
 % Example Inputs (3 Link Robot):
 %{
   clear;clc;

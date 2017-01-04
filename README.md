@@ -1,5 +1,3 @@
-#Version 1.0. Some high-level functions in Python under debugging.
-
 # Modern Robotics:  Mechanics, Planning, and Control
 # Code Library
 
@@ -8,6 +6,9 @@ This repository contains the code library accompanying _Modern Robotics:  Mechan
 * MATLAB
 * Mathematica
 
-Each function has a commented section above it explaining the inputs required for its use as well as an example of how it can be used and what the output will be. This repository also contains a pdf document that provides an overview of the available functions using MATLAB syntax. Functions are organized according to the chapter in which they are introduced in the book. Basic functions, such as functions to calculate the magnitude of a vector, normalize a vector, and perform matrix operations such as multiplication and inverses, are not documented here.
+Each function has a commented section above it explaining the inputs required for its use as well as an example of how it can be used and what the output will be. This repository also contains a pdf document that provides an overview of the available functions using MATLAB syntax. Functions are organized according to the chapter in which they are introduced in the book. Basic functions, such as functions to calculate the magnitude of a vector, normalize a vector, test if the value is near zero, and perform matrix operations such as multiplication and inverses, are not documented here.
 
-The primary purpose of the provided software is to be easy to read and educational, reinforcing the concepts in the book. The code is optimized neither for efficiency nor robustness, nor does it do full error-checking on its inputs.
+The primary purpose of the provided software is to be easy to read and educational, reinforcing the concepts in the book. The code is optimized for efficiency and robustness.
+
+Huan Weng
+01/03/2017

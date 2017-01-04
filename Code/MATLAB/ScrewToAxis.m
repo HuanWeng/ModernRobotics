@@ -2,9 +2,9 @@
 
 function S = ScrewToAxis(q,s,h)
 % Takes q: a point lying on the screw axis,
-% s: a unit vector in the direction of the screw axis, 
-% h: the pitch of the screw axis.
-% Returns the corresponding normalized screw axis
+%       s: a unit vector in the direction of the screw axis, 
+%       h: the pitch of the screw axis.
+% Returns the corresponding normalized screw axis.
 % Example Input:
 %{
   clear;clc;
@@ -23,4 +23,3 @@ function S = ScrewToAxis(q,s,h)
 %     2
 S = [s; cross(q,s) + h * s];
 end
-

@@ -29,7 +29,7 @@ function [taumat, thetamat] ...
 %       dt: The timestep between points on the reference trajectory.
 %       intRes: Integration resolution is the number of times integration 
 %               (Euler) takes places between each time step. Must be an 
-%               integer value greater than or equal to 1
+%               integer value greater than or equal to 1.
 % Returns taumat: An Nxn matrix of the controller commanded joint 
 %                 forces/torques, where each row of n forces/torques 
 %                 corresponds to a single time instant,
@@ -60,14 +60,13 @@ function [taumat, thetamat] ...
   Tf = 1;
   N = Tf / dt;
   method = 5;
-  traj = JointTrajectory(thetalist,thetaend,Tf,N,method);
-  thetamatd = traj;
-  dthetamatd = zeros(3,N);
-  ddthetamatd = zeros(3,N);
+  thetamatd = JointTrajectory(thetalist,thetaend,Tf,N,method);
+  dthetamatd = zeros(N,3);
+  ddthetamatd = zeros(N,3);
   dt = Tf / (N-1);
   for i = 1:N - 1
-      dthetamatd(:,i + 1) = (thetamatd(:,i + 1)-thetamatd(:,i)) / dt;
-      ddthetamatd(:,i + 1) = (dthetamatd(:,i + 1)-dthetamatd(:,i)) / dt;
+      dthetamatd(i + 1,:) = (thetamatd(i + 1,:)-thetamatd(i,:)) / dt;
+      ddthetamatd(i + 1,:) = (dthetamatd(i + 1,:)-dthetamatd(i,:)) / dt;
   end
   %Possibly wrong robot description (Example with 3 links)
   gtilde = [0.8; 0.2; -8.8];
@@ -80,7 +79,7 @@ function [taumat, thetamat] ...
   Ghat3 = diag([0.1, 0.1, 0.1, 3, 3, 3]);
   Gtildelist = {Ghat1, Ghat2, Ghat3};
   Mtildelist = {Mhat01, Mhat12, Mhat23, Mhat34}; 
-  Ftipmat = ones(6,N);
+  Ftipmat = ones(N,6);
   Kp = 20;
   Ki = 10;
   Kd = 18;
@@ -90,6 +89,10 @@ function [taumat, thetamat] ...
                     thetamatd,dthetamatd,ddthetamatd,gtilde,Mtildelist, ...
                     Gtildelist,Kp,Ki,Kd,dt,intRes);
 %}
+Ftipmat = Ftipmat';
+thetamatd = thetamatd';
+dthetamatd = dthetamatd';
+ddthetamatd = ddthetamatd';
 n = size(thetamatd,2);
 taumat = zeros(size(thetamatd));
 thetamat = zeros(size(thetamatd));
@@ -117,7 +120,6 @@ links = size(thetamat,1);
 leg = cell(1,2*links);
 time=0:dt:((dt*n)-(dt));
 timed=0:(dt):((dt*n)-(dt));
-disp(length(thetamatd(1,:)'));
 figure
 hold on
 for i=1:links
@@ -131,5 +133,6 @@ title('Plot of Actual and Desired Joint Angles')
 xlabel('Time')
 ylabel('Joint Angles')
 legend(leg, 'Location', 'NorthWest')
+taumat = taumat';
+thetamat = thetamat';
 end
-

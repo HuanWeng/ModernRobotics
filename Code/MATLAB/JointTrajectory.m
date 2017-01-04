@@ -16,7 +16,6 @@ function traj = JointTrajectory(thetastart,thetaend,Tf,N,method)
 % The returned trajectory is a straight-line motion in joint space.
 % Animation example can be seen at 
 % https://www.youtube.com/watch?v=fVElSuS1GgI
-%
 % Example Input:
 %{
   clear;clc;
@@ -29,14 +28,12 @@ function traj = JointTrajectory(thetastart,thetaend,Tf,N,method)
 %}
 % Output:
 % traj =
-%    1.0000    1.0208    1.0704    1.1296    1.1792    1.2000
-%         0    0.0520    0.1760    0.3240    0.4480    0.5000
-%         0    0.0624    0.2112    0.3888    0.5376    0.6000
-%    1.0000    1.0104    1.0352    1.0648    1.0896    1.1000
-%    1.0000    1.1040    1.3520    1.6480    1.8960    2.0000
-%    0.2000    0.3872    0.8336    1.3664    1.8128    2.0000
-%         0    0.0936    0.3168    0.5832    0.8064    0.9000
-%    1.0000    1.0000    1.0000    1.0000    1.0000    1.0000
+%   1.0000        0        0   1.0000   1.0000   0.2000        0   1.0000
+%   1.0208   0.0520   0.0624   1.0104   1.1040   0.3872   0.0936   1.0000
+%   1.0704   0.1760   0.2112   1.0352   1.3520   0.8336   0.3168   1.0000
+%   1.1296   0.3240   0.3888   1.0648   1.6480   1.3664   0.5832   1.0000
+%   1.1792   0.4480   0.5376   1.0896   1.8960   1.8128   0.8064   1.0000
+%   1.2000   0.5000   0.6000   1.1000   2.0000   2.0000   0.9000   1.0000
 timegap = Tf / (N - 1);
 traj = zeros(size(thetastart,1),N);
 for i = 1:N
@@ -47,4 +44,5 @@ for i = 1:N
     end
     traj(:,i) = thetastart + s * (thetaend - thetastart);
 end
+traj = traj';
 end

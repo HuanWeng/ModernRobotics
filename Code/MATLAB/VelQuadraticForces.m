@@ -7,10 +7,9 @@ function c = VelQuadraticForces(thetalist,dthetalist,Mlist,Glist,Slist)
 %       Glist: Spatial inertia matrices Gi of the links,
 %       Slist: Screw axes Si of the joints in a space frame.
 % Returns c: The vector c(thetalist,dthetalist) of Coriolis and centripetal
-%            terms for a given thetalist and dthetalist
+%            terms for a given thetalist and dthetalist.
 % This function calls InverseDynamics with g = 0, Ftip = 0, and 
-% ddthetalist = 0
-%
+% ddthetalist = 0.
 % Example Input (3 Link Robot):
 %{
   clear;clc;
@@ -32,7 +31,9 @@ function c = VelQuadraticForces(thetalist,dthetalist,Mlist,Glist,Slist)
 %}
 % Output:
 % c =
-%         0   -0.0277   -0.0069
+%    0.2645
+%   -0.0551
+%   -0.0069
 c = InverseDynamics(thetalist,dthetalist,zeros(size(thetalist,1),1), ...
                     [0; 0; 0],[0; 0; 0; 0; 0; 0],Mlist,Glist,Slist);
 end

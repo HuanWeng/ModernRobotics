@@ -6,7 +6,7 @@ function T = FKinSpace(M,Slist,thetalist)
 %       Slist: The joint screw axes in the space frame when the manipulator
 %              is at the home position,
 %       thetalist: A list of joint coordinates.
-% Returns T (SE(3)) representing the end-effector frame, when the joints 
+% Returns T in SE(3) representing the end-effector frame, when the joints 
 % are at the specified coordinates (i.t.o Space Frame).
 % Example Inputs:
 %{
@@ -29,4 +29,3 @@ for i = size(thetalist):-1:1
 	T = MatrixExp6(VecTose3(Slist(:,i) * thetalist(i))) * T;
 end
 end
-

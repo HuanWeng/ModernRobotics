@@ -15,5 +15,6 @@ function s = CubicTimeScaling(Tf,t)
 % Output:
 % s =
 %    0.2160
+
 s = 3 * (t / Tf) ^ 2 - 2 * (t / Tf) ^ 3;
 end

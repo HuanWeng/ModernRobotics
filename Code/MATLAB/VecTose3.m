@@ -15,5 +15,6 @@ function se3mat = VecTose3(V)
 %     3     0    -1     5
 %    -2     1     0     6
 %     0     0     0     0 
+
 se3mat = [VecToso3(V(1:3)), V(4:6); 0, 0, 0, 0];
 end

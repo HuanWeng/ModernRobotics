@@ -23,6 +23,7 @@ function Jb = JacobianBody(Blist,thetalist)
 %    2.3259    1.6681    0.5641    0.2000
 %   -1.4432    2.9456    1.4331    0.3000
 %   -2.0664    1.8288   -1.5887    0.4000
+
 Jb = Blist;
 T = eye(4);
 for i = length(thetalist) - 1:-1:1   

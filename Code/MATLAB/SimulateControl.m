@@ -18,11 +18,12 @@ function [taumat, thetamat] ...
 %                  reference trajectory,
 %       dthetamatd: An Nxn matrix of desired joint velocities,
 %       ddthetamatd: An Nxn matrix of desired joint accelerations,
-%       gtilde: The (possibly incorrect) model of the gravity vector,
-%       Mtildelist: The (possibly incorrect) model of the link frame 
-%                   locations,
-%       Gtildelist: The (possibly incorrect) model of the link spatial
-%                   inertias,
+%       gtilde: The gravity vector based on the model of the actual robot
+%               (actual values given above),
+%       Mtildelist: The link frame locations based on the model of the 
+%                   actual robot (actual values given above),
+%       Gtildelist: The link spatial inertias based on the model of the 
+%                   actual robot (actual values given above),
 %       Kp: The feedback proportional gain (identical for each joint),
 %       Ki: The feedback integral gain (identical for each joint),
 %       Kd: The feedback derivative gain (identical for each joint),
@@ -40,7 +41,7 @@ function [taumat, thetamat] ...
   clc;clear;
   thetalist = [0.1; 0.1; 0.1];
   dthetalist = [0.1; 0.2; 0.3];
-  %Initialise robot description (Example with 3 links)
+  %Initialize robot description (Example with 3 links)
   g = [0; 0; -9.8];
   M01 = [[1, 0, 0, 0]; [0, 1, 0, 0]; [0, 0, 1, 0.089159]; [0, 0, 0, 1]];
   M12 = [[0, 0, 1, 0.28]; [0, 1, 0, 0.13585]; [-1, 0 ,0, 0]; [0, 0, 0, 1]];
@@ -49,8 +50,8 @@ function [taumat, thetamat] ...
   G1 = diag([0.010267, 0.010267, 0.00666, 3.7, 3.7, 3.7]);
   G2 = diag([0.22689, 0.22689, 0.0151074, 8.393, 8.393, 8.393]);
   G3 = diag([0.0494433, 0.0494433, 0.004095, 2.275, 2.275, 2.275]);
-  Glist = {G1, G2, G3};
-  Mlist = {M01, M12, M23, M34}; 
+  Glist = cat(3,G1,G2,G3);
+  Mlist = cat(4,M01,M12,M23,M34); 
   Slist = [[1; 0; 1;      0; 1;     0], ...
            [0; 1; 0; -0.089; 0;     0], ...
            [0; 1; 0; -0.089; 0; 0.425]];
@@ -77,8 +78,8 @@ function [taumat, thetamat] ...
   Ghat1 = diag([0.1, 0.1, 0.1, 4, 4, 4]);
   Ghat2 = diag([0.3, 0.3, 0.1, 9, 9, 9]);
   Ghat3 = diag([0.1, 0.1, 0.1, 3, 3, 3]);
-  Gtildelist = {Ghat1, Ghat2, Ghat3};
-  Mtildelist = {Mhat01, Mhat12, Mhat23, Mhat34}; 
+  Gtildelist = cat(3,Ghat1,Ghat2,Ghat3);
+  Mtildelist = cat(4,Mhat01,Mhat12,Mhat23,Mhat34); 
   Ftipmat = ones(N,6);
   Kp = 20;
   Ki = 10;
@@ -89,6 +90,7 @@ function [taumat, thetamat] ...
                     thetamatd,dthetamatd,ddthetamatd,gtilde,Mtildelist, ...
                     Gtildelist,Kp,Ki,Kd,dt,intRes);
 %}
+
 Ftipmat = Ftipmat';
 thetamatd = thetamatd';
 dthetamatd = dthetamatd';
@@ -111,8 +113,8 @@ for i=1:n
         [thetacurrent, dthetacurrent] ...
         = EulerStep(thetacurrent,dthetacurrent,ddthetalist,(dt/intRes));
     end
-	taumat(:,i) = taulist;
-	thetamat(:,i) = thetacurrent;    
+    taumat(:,i) = taulist;
+    thetamat(:,i) = thetacurrent;    
     eint = eint + (dt*(thetamatd(:,i) - thetacurrent));
 end
 %Output using matplotlib

@@ -26,44 +26,36 @@ function [thetalist, success] = IKinSpace(Slist,M,T,thetalist0,eomg,ev)
 % Example Inputs:
 %{
   clear;clc;
-  Slist = [[0; 0; 1;      0; 0;     0], ...
-           [0; 1; 0;      0; 0;     0], ...
-           [0; 0; 1;      0; 0;     0], ...
-           [0; 1; 0; -0.550; 0; 0.045], ...
-           [0; 0; 1;      0; 0;     0], ...
-           [0; 1; 0; -0.850; 0;     0], ...
-           [0; 0; 1;      0; 0;     0]];
-  M = [[1, 0, 0, 0]; [0, 1, 0, 0]; [0, 0, 1, 0.910]; [0, 0, 0, 1]];
-  T = [[1, 0, 0, 0.4]; [0, 1, 0, 0]; [0, 0, 1, 0.4]; [0, 0, 0, 1]];
-  thetalist0 = [0; 0; 0; 0; 0; 0; 0];
+  Slist = [[0; 0;  1;  4; 0;    0], ...
+           [0; 0;  0;  0; 1;    0], ...
+           [0; 0; -1; -6; 0; -0.1]];
+  M = [[-1, 0, 0, 0]; [0, 1, 0, 6]; [0, 0, -1, 2]; [0, 0, 0, 1]];
+  T = [[0, 1, 0, -5]; [1, 0, 0, 4]; [0, 0, -1, 1.6858]; [0, 0, 0, 1]];
+  thetalist0 = [1.5; 2.5; 3];
   eomg = 0.01;
   ev = 0.001;
   [thetalist, success] = IKinSpace(Slist,M,T,thetalist0,eomg,ev)
 %}
 % Output:
 % thetalist =
-%    0.0000
-%    1.3537
-%   -0.0000
-%   -1.7100
-%    0.0000
-%    0.3564
-%   -0.0000
+%    1.5707
+%    2.9997
+%    3.1415
 % success =
 %     1
+
 thetalist = thetalist0;
 i = 0;
 maxiterations = 20;
-success = true;
-Vs = se3ToVec(MatrixLog6(TransInv(FKinSpace(M,Slist,thetalist)) * T));
+Tsb = FKinSpace(M,Slist,thetalist);
+Vs = Adjoint(Tsb) * se3ToVec(MatrixLog6(TransInv(Tsb) * T));
 err = norm(Vs(1:3)) > eomg || norm(Vs(4:6)) > ev;
 while err && i < maxiterations
     thetalist = thetalist + pinv(JacobianSpace(Slist,thetalist)) * Vs;
     i = i + 1;
-    Vs = se3ToVec(MatrixLog6(TransInv(FKinSpace(M,Slist,thetalist)) * T));
+    Tsb = FKinSpace(M,Slist,thetalist);
+    Vs = Adjoint(Tsb) * se3ToVec(MatrixLog6(TransInv(Tsb) * T));
     err = norm(Vs(1:3)) > eomg || norm(Vs(4:6)) > ev;
 end
-if err
-    success = false;
-end
+success = ~ err;
 end

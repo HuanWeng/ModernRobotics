@@ -23,8 +23,8 @@ function JTFtip = EndEffectorForces(thetalist,Ftip,Mlist,Glist,Slist)
   G1 = diag([0.010267, 0.010267, 0.00666, 3.7, 3.7, 3.7]);
   G2 = diag([0.22689, 0.22689, 0.0151074, 8.393, 8.393, 8.393]);
   G3 = diag([0.0494433, 0.0494433, 0.004095, 2.275, 2.275, 2.275]);
-  Glist = {G1, G2, G3};
-  Mlist = {M01, M12, M23, M34}; 
+  Glist = cat(3,G1,G2,G3);
+  Mlist = cat(4,M01,M12,M23,M34); 
   Slist = [[1; 0; 1;      0; 1;     0], ...
            [0; 1; 0; -0.089; 0;     0], ...
            [0; 1; 0; -0.089; 0; 0.425]];
@@ -35,6 +35,7 @@ function JTFtip = EndEffectorForces(thetalist,Ftip,Mlist,Glist,Slist)
 %    1.4095
 %    1.8577
 %    1.3924
+
 n = size(thetalist,1);
 JTFtip = InverseDynamics(thetalist,zeros(n,1),zeros(n,1),[0; 0; 0], ...
                          Ftip,Mlist,Glist,Slist);

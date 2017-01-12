@@ -23,6 +23,7 @@ function Js = JacobianSpace(Slist,thetalist)
 %         0    1.9522   -2.2164   -0.5116
 %    0.2000    0.4365   -2.4371    2.7754
 %    0.2000    2.9603    3.2357    2.2251
+
 Js = Slist;
 T = eye(4);
 for i = 2:length(thetalist)

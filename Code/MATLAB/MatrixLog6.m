@@ -16,16 +16,17 @@ function expmat = MatrixLog6(T)
 %         0         0   -1.5708    2.3562
 %         0    1.5708         0    2.3562
 %         0         0         0         0
+
 [R, p] = TransToRp(T);
-if Nearzero(norm(R - eye(3)))
+if NearZero(norm(R - eye(3)))
     expmat = [zeros(3), T(1:3,4); 0, 0, 0, 0];
 else
-	acosinput = (trace(R) - 1) / 2;
-	if acosinput > 1
+    acosinput = (trace(R) - 1) / 2;
+    if acosinput > 1
         acosinput = 1;
     elseif acosinput < -1
         acosinput = -1;
-	end
+    end
     theta = acos(acosinput);
     omgmat = MatrixLog3(R);
     expmat = [ omgmat, (eye(3) - omgmat / 2 ...

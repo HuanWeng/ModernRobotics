@@ -21,5 +21,6 @@ function S = ScrewToAxis(q,s,h)
 %     0
 %    -3
 %     2
+
 S = [s; cross(q,s) + h * s];
 end

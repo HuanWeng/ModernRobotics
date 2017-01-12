@@ -29,6 +29,7 @@ function [thetalistNext, dthetalistNext] ...
 %    0.3000
 %    0.3500
 %    0.4000
+
 thetalistNext = thetalist + dt * dthetalist;
 dthetalistNext = dthetalist + dt * ddthetalist;
 end

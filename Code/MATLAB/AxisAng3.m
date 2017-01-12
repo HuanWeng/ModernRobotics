@@ -17,6 +17,7 @@ function [omghat, theta] = AxisAng3(expc3)
 %    0.8018
 % theta =
 %    3.7417
+
 theta = norm(expc3);
 omghat = expc3 / theta;
 end

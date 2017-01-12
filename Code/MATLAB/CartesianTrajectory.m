@@ -12,12 +12,9 @@ function traj = CartesianTrajectory(Xstart,Xend,Tf,N,method)
 % Returns traj: The discretized trajectory as a list of N matrices in SE(3)
 %               separated in time by Tf/(N-1). The first in the list is 
 %               Xstart and the Nth is Xend .
-% This function is Similar to ScrewTrajectory, except the origin of the 
+% This function is similar to ScrewTrajectory, except the origin of the 
 % end-effector frame follows a straight line, decoupled from the rotational
 % motion.
-% Animation example can be seen at 
-% https://www.youtube.com/watch?v=ycaGRk_0AE8
-% 
 % Example Input:
 %{ 
   clear;clc;
@@ -49,17 +46,18 @@ function traj = CartesianTrajectory(Xstart,Xend,Tf,N,method)
 %    1.0000   -0.0000    0.0000         0
 %    0.0000    1.0000   -0.0000    4.1000
 %         0         0         0    1.0000
+
 timegap = Tf / (N - 1);
 traj = cell(1,N);
 [Rstart, pstart] = TransToRp(Xstart);
 [Rend, pend] = TransToRp(Xend);
 for i = 1:N
-	if method == 3
+    if method == 3
         s = CubicTimeScaling(Tf,timegap * (i - 1));
     else
         s = QuinticTimeScaling(Tf,timegap * (i - 1));
     end
-	traj{i} ...
+    traj{i} ...
     = [Rstart * MatrixExp3(MatrixLog3(Rstart' * Rend) * s), ...
        pstart + s * (pend - pstart); 0, 0, 0, 1];
 end

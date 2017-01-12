@@ -16,5 +16,6 @@ function s = QuinticTimeScaling(Tf,t)
 % Output:
 % s =
 %    0.1631
+
 s = 10 * (t / Tf) ^ 3 - 15 * (t / Tf) ^ 4 + 6 * (t / Tf) ^ 5;
 end

@@ -4,7 +4,6 @@ function T = MatrixExp6(se3mat)
 % Takes a se(3) representation of exponential coordinates.
 % Returns a T matrix in SE(3) that is achieved by traveling along/about the 
 % screw axis S for a distance theta from an initial configuration T = I.
-% Rodriguez R = I + sin(theta)*omg + (1-cos(theta))*omg^2
 % Example Input:
 %{
   clear;clc;
@@ -20,8 +19,9 @@ function T = MatrixExp6(se3mat)
 %         0    0.0000   -1.0000   -0.0000
 %         0    1.0000    0.0000    3.0000
 %         0         0         0    1.0000 
+
 omgtheta = so3ToVec(se3mat(1:3,1:3));
-if Nearzero(norm(omgtheta))
+if NearZero(norm(omgtheta))
     T = [eye(3), se3mat(1:3,4); 0, 0, 0, 1];
 else
     [omghat, theta] = AxisAng3(omgtheta);

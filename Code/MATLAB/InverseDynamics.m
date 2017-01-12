@@ -32,8 +32,8 @@ function taulist = InverseDynamics(thetalist,dthetalist,ddthetalist,g, ...
   G1 = diag([0.010267, 0.010267, 0.00666, 3.7, 3.7, 3.7]);
   G2 = diag([0.22689, 0.22689, 0.0151074, 8.393, 8.393, 8.393]);
   G3 = diag([0.0494433, 0.0494433, 0.004095, 2.275, 2.275, 2.275]);
-  Glist = {G1, G2, G3};
-  Mlist = {M01, M12, M23, M34}; 
+  Glist = cat(3,G1,G2,G3);
+  Mlist = cat(4,M01,M12,M23,M34); 
   Slist = [[1; 0; 1;      0; 1;     0], ...
            [0; 1; 0; -0.089; 0;     0], ...
            [0; 1; 0; -0.089; 0; 0.425]];
@@ -45,28 +45,29 @@ function taulist = InverseDynamics(thetalist,dthetalist,ddthetalist,g, ...
 %   74.6962
 %  -33.0677
 %   -3.2306
+
 n = size(thetalist,1);
 Mi = eye(4);
 Ai = zeros(6,n);
-AdTi = cell(1,n + 1);
+AdTi = zeros(6,6,n + 1);
 Vi = zeros(6,n + 1);
 Vdi = zeros(6,n + 1);
 Vdi(4:6,1) = -g;
-AdTi{n + 1} = Adjoint(TransInv(Mlist{n + 1}));
+AdTi(:,:,n + 1) = Adjoint(TransInv(Mlist(:,:,n + 1)));
 Fi = Ftip;
 taulist = zeros(n,1);
 for i=1:n    
-    Mi = Mi * Mlist{i};
+    Mi = Mi * Mlist(:,:,i);
     Ai(:,i) = Adjoint(TransInv(Mi)) * Slist(:,i);    
-    AdTi{i} = Adjoint(MatrixExp6(VecTose3(Ai(:,i) * -thetalist(i))) ...
-                      * TransInv(Mlist{i}));    
-    Vi(:,i + 1) = AdTi{i} * Vi(:,i) + Ai(:,i) * dthetalist(i);
-    Vdi(:,i + 1) = AdTi{i} * Vdi(:,i) + Ai(:,i) * ddthetalist(i) ...
+    AdTi(:,:,i) = Adjoint(MatrixExp6(VecTose3(Ai(:,i) * -thetalist(i))) ...
+                      * TransInv(Mlist(:,:,i)));    
+    Vi(:,i + 1) = AdTi(:,:,i) * Vi(:,i) + Ai(:,i) * dthetalist(i);
+    Vdi(:,i + 1) = AdTi(:,:,i) * Vdi(:,i) + Ai(:,i) * ddthetalist(i) ...
                    + ad(Vi(:,i + 1)) * Ai(:,i) * dthetalist(i) ;    
 end
 for i = n:-1:1
-	Fi = AdTi{i + 1}'* Fi + Glist{i} * Vdi(:,i + 1) ...
-         - ad(Vi(:,i + 1))' * (Glist{i} * Vi(:,i + 1));
+    Fi = AdTi(:,:,i + 1)'* Fi + Glist(:,:,i) * Vdi(:,i + 1) ...
+         - ad(Vi(:,i + 1))' * (Glist(:,:,i) * Vi(:,i + 1));
     taulist(i) = Fi' * Ai(:,i);
 end
 end

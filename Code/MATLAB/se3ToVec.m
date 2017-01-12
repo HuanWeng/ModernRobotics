@@ -17,5 +17,6 @@ function V = se3ToVec(se3mat)
 %     4
 %     5
 %     6
+
 V = [se3mat(3,2); se3mat(1,3); se3mat(2,1); se3mat(1:3,4)];
 end

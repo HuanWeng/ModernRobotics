@@ -14,6 +14,7 @@ function norm_v = Normalize(V)
 %    0.2673
 %    0.5345
 %    0.8018
+
 norm_v = V / norm(V);
 end
 

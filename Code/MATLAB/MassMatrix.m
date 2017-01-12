@@ -22,8 +22,8 @@ function M = MassMatrix(thetalist,Mlist,Glist,Slist)
   G1 = diag([0.010267, 0.010267, 0.00666, 3.7, 3.7, 3.7]);
   G2 = diag([0.22689, 0.22689, 0.0151074, 8.393, 8.393, 8.393]);
   G3 = diag([0.0494433, 0.0494433, 0.004095, 2.275, 2.275, 2.275]);
-  Glist = {G1, G2, G3};
-  Mlist = {M01, M12, M23, M34}; 
+  Glist = cat(3,G1,G2,G3);
+  Mlist = cat(4,M01,M12,M23,M34);  
   Slist = [[1; 0; 1;      0; 1;     0], ...
            [0; 1; 0; -0.089; 0;     0], ...
            [0; 1; 0; -0.089; 0; 0.425]];
@@ -34,13 +34,13 @@ function M = MassMatrix(thetalist,Mlist,Glist,Slist)
 %   22.5433   -0.3071   -0.0072
 %   -0.3071    1.9685    0.4322
 %   -0.0072    0.4322    0.1916
+
 n = size(thetalist,1);
 M = zeros(n);
-dthetalist = zeros(n,1);
 for i = 1:n
    ddthetalist = zeros(n,1);
    ddthetalist(i) = 1;
-   M(:,i) = InverseDynamics(thetalist,dthetalist,ddthetalist,[0; 0; 0], ...
+   M(:,i) = InverseDynamics(thetalist,zeros(n,1),ddthetalist,[0; 0; 0], ...
                             [0; 0; 0; 0; 0; 0],Mlist,Glist,Slist);
 end
 end

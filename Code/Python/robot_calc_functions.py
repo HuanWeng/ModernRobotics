@@ -27,20 +27,17 @@ import random
 *** BASIC HELPER FUNCTIONS ***
 '''
 
-def Nearzero(z):
+def NearZero(z):
 #Takes a scalar.
 #Checks if the scalar is small enough to be neglected.
     '''
 Example Input:
 z = -1e-6
 Output:
-1
+True
     '''
-    if abs(z) < 1e-5:
-	return True
-    else:
-	return False
-       
+    return abs(z) < 1e-5
+   
 def Normalize(V):
 #Takes a vector.
 #Scales it to a unit vector.
@@ -116,7 +113,6 @@ def MatrixExp3(so3mat):
 #Takes a so(3) representation of exponential coordinates.
 #Returns R in SO(3) that is achieved by rotating about omghat by theta from
 #an initial orientation R = I.
-#Rodriguez R = I + sin(theta)*omghat + (1-cos(theta))*omghat^2
     '''
 Example Input: 
 so3mat = [[ 0, -3,  2],
@@ -128,7 +124,7 @@ Output:
  [ 0.69297817,  0.6313497 ,  0.34810748]]
     '''
     omgtheta = so3ToVec(so3mat)
-    if Nearzero(np.linalg.norm(omgtheta)):
+    if NearZero(np.linalg.norm(omgtheta)):
         return np.eye(3)
     else:
         theta = AxisAng3(omgtheta)[1]
@@ -149,13 +145,13 @@ Output:
  [ 1.20919958,           0, -1.20919958],
  [-1.20919958,  1.20919958,           0]]
     '''
-    if Nearzero(np.linalg.norm(R - np.eye(3))):
+    if NearZero(np.linalg.norm(R - np.eye(3))):
         return np.zeros(3,3)
-    elif Nearzero(np.trace(R) + 1):
-        if not Nearzero(1 + R[2][2]):
+    elif NearZero(np.trace(R) + 1):
+        if not NearZero(1 + R[2][2]):
             omg = (1.0 / sqrt(2 * (1 + R[2][2]))) \
                   * np.array([R[0][2], R[1][2], 1 + R[2][2]])
-        elif not Nearzero(1 + R[1][1]): 
+        elif not NearZero(1 + R[1][1]): 
             omg = (1.0 / sqrt(2 * (1 + R[1][1]))) \
                   * np.array([R[0][1], 1 + R[1][1], R[2][1]])
         else:
@@ -308,7 +304,7 @@ Output:
 1.0)
     '''
     theta = np.linalg.norm([expc6[0], expc6[1], expc6[2]])
-    if Nearzero(theta):
+    if NearZero(theta):
         theta = np.linalg.norm([expc6[3], expc6[4], expc6[5]])
     return (expc6 / theta,theta)
 
@@ -316,7 +312,6 @@ def MatrixExp6(se3mat):
 #Takes a se(3) representation of exponential coordinates.
 #Returns a T matrix SE(3) that is achieved by traveling along/about the
 #screw axis S for a distance theta from an initial configuration T = I.
-#Rodriguez R = I + sin(theta)*omg + (1-cos(theta))*omg^2
     '''
 Example Input: 
 se3mat = [[0,                 0,                  0,                 0],
@@ -330,7 +325,7 @@ Output:
  [  0,   0,    0,   1]]
     '''  
     omgtheta = so3ToVec(np.array(se3mat)[0:3:1,0:3:1])
-    if Nearzero(np.linalg.norm(omgtheta)):
+    if NearZero(np.linalg.norm(omgtheta)):
         return np.r_[np.c_[np.eye(3),
                            [se3mat[0][3],se3mat[1][3],se3mat[2][3]]],
                      [[0, 0, 0, 1]]]
@@ -357,7 +352,7 @@ Output:
 [1.5707963267948966, 0.0, 0.0, 0.0, 2.3561944901923448, 2.3561944901923457]
     '''
     R,p = TransToRp(T)
-    if Nearzero(np.linalg.norm(R - np.eye(3))):
+    if NearZero(np.linalg.norm(R - np.eye(3))):
         return np.r_[np.c_[np.zeros((3,3)),
                            [T[0][3], T[1][3], T[2][3]]],
                      [[0, 0, 0, 0]]]
@@ -524,31 +519,23 @@ def IKinBody(Blist,M,T,thetalist0,eomg,ev):
 #the start of the function, but can be changed if needed.  
     '''
 Example Input: 
-Blist = np.array([[0,  1, 0,  0.191,      0, 0.817], 
-                  [0,  0, 1,  0.095, -0.817,     0],
-                  [0,  0, 1,  0.095, -0.392,     0],
-                  [0,  0, 1,  0.095,      0,     0],
-                  [0, -1, 0, -0.082,      0,     0],
-                  [0,  0, 1,      0,      0,     0]]).T
-M = [[1, 0,  0, -0.817], 
-     [0, 0, -1, -0.191], 
-     [0, 1,  0, -0.006], 
-     [0, 0,  0,      1]]
-T = [[0, 1, 0, -0.6], [0, 0, -1, 0.1], [-1, 0, 0, 0.1], [0, 0, 0, 1]]
-thetalist0 =[0, 0, 0, 0, 0, 0]
+Blist = np.array([[0, 0, -1, 2, 0,   0],
+                  [0, 0,  0, 0, 1,   0], 
+                  [0, 0,  1, 0, 0, 0.1]]).T
+M = [[-1, 0, 0, 0], [0, 1, 0, 6], [0, 0, -1, 2], [0, 0, 0, 1]]
+T = [[0, 1, 0, -5], [1, 0, 0, 4], [0, 0, -1, 1.6858], [0, 0, 0, 1]]
+thetalist0 = [1.5, 2.5, 3]
 eomg = 0.01
 ev = 0.001
 Output:
 thetalist:
-[-0.46921905, -0.83447622,  1.39525223, \
- -0.56107486, -0.46731326, -1.57056352]
+[1.57073819, 2.999667, 3.14153913]
 success:
 True
     '''
     thetalist = np.array(thetalist0).copy()
     i = 0
     maxiterations = 20
-    success = True
     Vb = se3ToVec(MatrixLog6(np.dot(TransInv(FKinBody(M,Blist, \
                                                       thetalist)),T)))
     err = np.linalg.norm([Vb[0], Vb[1], Vb[2]]) > eomg \
@@ -563,9 +550,7 @@ True
                                                        thetalist)),T)))
         err = np.linalg.norm([Vb[0], Vb[1], Vb[2]]) > eomg \
               or np.linalg.norm([Vb[3], Vb[4], Vb[5]]) > ev
-    if err:
-        success = False
-    return (thetalist,success)
+    return (thetalist,not err)
 
 def IKinSpace(Slist,M,T,thetalist0,eomg,ev):
 #Takes Slist: The joint screw axes in the space frame when the manipulator 
@@ -592,30 +577,25 @@ def IKinSpace(Slist,M,T,thetalist0,eomg,ev):
 #the start of the function, but can be changed if needed.  
     '''
 Example Input: 
-Slist = np.array([[0, 0, 1,      0, 0,     0], 
-                  [0, 1, 0,      0, 0,     0],
-                  [0, 0, 1,      0, 0,     0],
-                  [0, 1, 0, -0.550, 0, 0.045],
-                  [0, 0, 1,      0, 0,     0],
-                  [0, 1, 0, -0.850, 0,     0],
-                  [0, 0, 1,      0, 0,     0]]).T
-M = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.910], [0, 0, 0, 1]]
-T = [[1, 0, 0, 0.4], [0, 1, 0, 0], [0, 0, 1, 0.4], [0, 0, 0, 1]]
-thetalist0 = [0, 0, 0, 0, 0, 0, 0]
+Slist = np.array([[0, 0,  1,  4, 0,    0],
+                  [0, 0,  0,  0, 1,    0],
+                  [0, 0, -1, -6, 0, -0.1]]).T
+M = [[-1, 0, 0, 0], [0, 1, 0, 6], [0, 0, -1, 2], [0, 0, 0, 1]]
+T = [[0, 1, 0, -5], [1, 0, 0, 4], [0, 0, -1, 1.6858], [0, 0, 0, 1]]
+thetalist0 = [1.5, 2.5, 3]
 eomg = 0.01
 ev = 0.001
 Output:
 thetalist:
-[0, 1.35367679e+00, 0, -1.71003042e+00, 0, 3.56353634e-01, 0]
+[1.57073785, 2.99966405, 3.14154125]
 success:
 True
     '''
     thetalist = np.array(thetalist0).copy()
     i = 0
     maxiterations = 20
-    success = True
-    Vs = se3ToVec(MatrixLog6(np.dot(TransInv(FKinSpace(M,Slist, \
-                                                       thetalist)),T)))
+    Tsb = FKinSpace(M,Slist,thetalist)
+    Vs = np.dot(Adjoint(Tsb),se3ToVec(MatrixLog6(np.dot(TransInv(Tsb),T))))
     err = np.linalg.norm([Vs[0], Vs[1], Vs[2]]) > eomg \
           or np.linalg.norm([Vs[3], Vs[4], Vs[5]]) > ev
     while err and i < maxiterations:
@@ -623,13 +603,12 @@ True
                     + np.dot(np.linalg.pinv(JacobianSpace(Slist, \
                                                           thetalist)),Vs)
         i = i + 1
-        Vs = se3ToVec(MatrixLog6(np.dot(TransInv(FKinSpace(M,Slist, \
-                                                        thetalist)),T)))
+        Tsb = FKinSpace(M,Slist,thetalist)
+        Vs = np.dot(Adjoint(Tsb), \
+                    se3ToVec(MatrixLog6(np.dot(TransInv(Tsb),T))))
         err = np.linalg.norm([Vs[0], Vs[1], Vs[2]]) > eomg \
               or np.linalg.norm([Vs[3], Vs[4], Vs[5]]) > ev
-    if err:
-        success = False
-    return (thetalist,success)
+    return (thetalist,not err)
 
 '''
 *** CHAPTER 8: DYNAMICS OF OPEN CHAINS ***
@@ -755,11 +734,10 @@ Output:
     '''
     n = len(thetalist)
     M = np.zeros((n,n))
-    dthetalist = [0] * n
     for i in range (n):
         ddthetalist = [0] * n
         ddthetalist[i] = 1
-        M[:,i] = InverseDynamics(thetalist,dthetalist,ddthetalist, \
+        M[:,i] = InverseDynamics(thetalist,[0] * n,ddthetalist, \
                                  [0, 0, 0],[0, 0, 0, 0, 0, 0], Mlist, \
                                  Glist,Slist)
     return M
@@ -1159,8 +1137,6 @@ def JointTrajectory(thetastart,thetaend,Tf,N,method):
 #              row is thetastart and the Nth row is thetaend . The elapsed 
 #              time between each row is Tf/(N - 1).
 #The returned trajectory is a straight-line motion in joint space.
-#Animation example can be seen at 
-#https://www.youtube.com/watch?v=fVElSuS1GgI
     '''
 Example Input: 
 thetastart = [1, 0, 0, 1, 1, 0.2, 0,1]
@@ -1252,10 +1228,9 @@ def CartesianTrajectory(Xstart,Xend,Tf,N,method):
 #Returns traj: The discretized trajectory as a list of N matrices in SE(3)
 #              separated in time by Tf/(N-1). The first in the list is 
 #              Xstart and the Nth is Xend.
-#This function is Similar to ScrewTrajectory, except the origin of the 
+#This function is similar to ScrewTrajectory, except the origin of the 
 #end-effector frame follows a straight line, decoupled from the rotational 
 #motion.
-#Animation example can be seen at https://www.youtube.com/watch?v=ycaGRk_0AE8
     '''
 Example Input: 
 Xstart = [[1, 0, 0, 1], [0, 1, 0, 0], [0, 0, 1, 1], [0, 0, 0, 1]]
@@ -1371,11 +1346,12 @@ def SimulateControl(thetalist,dthetalist,g,Ftipmat,Mlist,Glist,Slist, \
 #                 reference trajectory,
 #      dthetamatd: An Nxn matrix of desired joint velocities,
 #      ddthetamatd: An Nxn matrix of desired joint accelerations,
-#      gtilde: The (possibly incorrect) model of the gravity vector,
-#      Mtildelist: The (possibly incorrect) model of the link frame 
-#                  locations,
-#      Gtildelist: The (possibly incorrect) model of the link spatial 
-#                  inertias,
+#      gtilde: The gravity vector based on the model of the actual robot 
+#              (actual values given above),
+#      Mtildelist: The link frame locations based on the model of the 
+#                  actual robot (actual values given above),
+#      Gtildelist: The link spatial inertias based on the model of the 
+#                  actual robot (actual values given above),
 #      Kp: The feedback proportional gain (identical for each joint),
 #      Ki: The feedback integral gain (identical for each joint),
 #      Kd: The feedback derivative gain (identical for each joint),

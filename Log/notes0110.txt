@@ -1,0 +1,15 @@
+Kevin's comments:
+indentation of all the functions
+should it be using magnitude instead of norm for test?
+AxisAng6:  what if whole vector is near zero? (do we need input checks?) 
+
+blank line between comments and first lines of real code
+
+
+
+Major changes:
+Correct the algorithm of IKinSpace and check each iteration using the same example. 
+Change the examples of IKinBody and IKinSpace to be in the same case. (Share M, T and theta, use either Blist or Slist).
+
+
+

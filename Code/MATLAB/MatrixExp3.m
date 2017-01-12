@@ -4,7 +4,6 @@ function  R = MatrixExp3(so3mat)
 % Takes a 3x3 so(3) representation of exponential coordinates.
 % Returns R in SO(3) that is achieved by rotating about omghat by theta 
 % from an initial orientation R = I.
-% Rodriguez R = I + sin(theta)*omghat + (1-cos(theta))*omghat^2
 % Example Input:
 %{
   clear;clc;
@@ -16,8 +15,9 @@ function  R = MatrixExp3(so3mat)
 %   -0.6949    0.7135    0.0893
 %   -0.1920   -0.3038    0.9332
 %    0.6930    0.6313    0.3481
+
 omgtheta = so3ToVec(so3mat);
-if Nearzero(norm(omgtheta))
+if NearZero(norm(omgtheta))
     R = eye(3);
 else
     [omghat, theta] = AxisAng3(omgtheta);

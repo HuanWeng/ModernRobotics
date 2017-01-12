@@ -21,8 +21,9 @@ function [S,theta] = AxisAng6(expc6)
 %     3
 % theta =
 %     1
+
 theta = norm(expc6(1:3));
-if Nearzero(theta)
+if NearZero(theta)
     theta = norm(expc6(4:6));
 end
 S = expc6 / theta;      

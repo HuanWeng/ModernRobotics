@@ -24,8 +24,9 @@ function T = FKinSpace(M,Slist,thetalist)
 %    1.0000    0.0000         0    4.0000
 %         0         0   -1.0000    1.6858
 %         0         0         0    1.0000
+
 T = M;
 for i = size(thetalist):-1:1
-	T = MatrixExp6(VecTose3(Slist(:,i) * thetalist(i))) * T;
+    T = MatrixExp6(VecTose3(Slist(:,i) * thetalist(i))) * T;
 end
 end

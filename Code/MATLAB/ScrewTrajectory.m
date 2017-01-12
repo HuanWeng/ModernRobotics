@@ -14,7 +14,6 @@ function traj = ScrewTrajectory(Xstart,Xend,Tf,N,method)
 %               Xstart and the Nth is Xend .
 % This function calculates a trajectory corresponding to the screw motion 
 % about a space screw axis.
-%
 % Example Input:
 %{
   clear;clc;
@@ -46,15 +45,16 @@ function traj = ScrewTrajectory(Xstart,Xend,Tf,N,method)
 %    1.0000   -0.0000    0.0000   -0.0000
 %    0.0000    1.0000   -0.0000    4.1000
 %         0         0         0    1.0000
+
 timegap = Tf / (N - 1);
 traj = cell(1,N);
 for i = 1:N
-	if method == 3
+    if method == 3
         s = CubicTimeScaling(Tf,timegap * (i - 1));
     else
         s = QuinticTimeScaling(Tf,timegap * (i - 1));
     end
-	traj{i} = Xstart * MatrixExp6(MatrixLog6(TransInv(Xstart) * Xend) * s);
+    traj{i} = Xstart * MatrixExp6(MatrixLog6(TransInv(Xstart) * Xend) * s);
 end
 end
 

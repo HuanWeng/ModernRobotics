@@ -2,17 +2,18 @@
 
 \usepackage{amsfonts}
 \usepackage{amsmath}
-\usepackage{graphicx}
 \usepackage{framed}
 \usepackage{xcolor}
 \usepackage{enumitem}
 \usepackage{booktabs}
-\usepackage{tabularx}
 \usepackage{ltablex}
 \usepackage{ifthen}
-\usepackage{comment}
+\usepackage[linktoc=all,colorlinks=true,urlcolor=blue]{hyperref}
+\hypersetup{
+  colorlinks,
+  linkcolor=blue
+}
 
-%\renewcommand\thesection{\Roman{section}}
 \newcommand{\real}{\mathbb{R}}
 
 \newenvironment{function}[4]		%A new environment for functions 
@@ -21,7 +22,6 @@
 \noindent
 \verb~#1~		%The function's name.
 \end{shaded*}
-%\footnotesize
 \vspace*{-5pt}
 \ifthenelse{\equal{\detokenize{#2}}{\detokenize{}}}
 {}                              % what to do if there is no description
@@ -49,9 +49,9 @@ Output:
 \setlength{\marginparsep}{0.75cm}
 \setlength{\marginparwidth}{2.5cm}
 \setlength{\marginparpush}{1.0cm}
-\setlength{\textwidth}{6.5in}
-\setlength{\textheight}{9in}
-\setlength{\topmargin}{-0.5in}
+\setlength{\textwidth}{16.5cm}
+\setlength{\textheight}{22.86cm}
+\setlength{\topmargin}{-1.27cm}
 
 \definecolor{shadecolor}{rgb}{0.9,0.9,0.9}
 
@@ -59,17 +59,21 @@ Output:
 
 \begin{center}			%Title.
 \Large
-{\bf Introduction to Robotics:  Mechanics, Planning, and Control} \\
+{\bf Modern Robotics:  Mechanics, Planning, and Control} \\
 {\bf Code Library} \\
 \normalsize
+\vspace*{0.2in}
+Huan Weng and Kevin M. Lynch \\
 \today
 \end{center}
 
-\section*{Introduction}			%Chapter 1
+\section*{Introduction}			
 
-The code library accompanying \emph{Introduction to Robotics:  Mechanics, Planning, and Control} is written for MATLAB, Mathematica, and Python, and originates from students' solutions to programming assignments in courses using material from the book.  The following students made significant contributions to the code:  Mikhail Todes, Huan Weng, Matthew Collins, Mojtaba Mozaffar, Chang Liu, and Wentao Chen.  
+This is the documentation for the code library accompanying \emph{Modern Robotics:  Mechanics, Planning, and Control}, by Kevin M. Lynch and Frank C. Park, Cambridge University Press, 2017.  The code is written for MATLAB, Mathematica, and Python, and originates from students' solutions to programming assignments in courses using material from the book.  The current version of the code is largely the work of Huan Weng, based on previous contributions from Mikhail Todes, Matthew Collins, Mojtaba Mozaffar, Chang Liu, and Wentao Chen.  
 
-The code is commented and mostly self-explanatory. The primary purpose of the provided software is to be easy to read and educational, reinforcing the concepts in the book.  The code is optimized neither for efficiency nor robustness, nor does it do full error-checking on its inputs. This document provides an overview of the available functions using MATLAB syntax.  Functions are organized according to the chapter in which they are introduced in the book.  Basic functions, such as functions to calculate the magnitude of a vector, normalize a vector, test if the value is near zero, and perform matrix operations such as multiplication and inverses, are not documented here.
+The code is commented and mostly self-explanatory in conjunction with the book.  An example use is provided with each function.  The primary purpose of the software is to be easy to read and educational, reinforcing the concepts in the book.  The code is optimized neither for efficiency nor robustness (it does not perform error-checking on its inputs).  This is to keep the code as simple and unintimidating as possible.  Users are encouraged to use and modify the code however they wish; the process of using and modifying the code certainly aids in understanding the concepts in the book.  Bug reports or documentation errors are appreciated via the issue tracker at \url{https://github.com/NxRLab/ModernRobotics}.
+
+This document provides an overview of the available functions using MATLAB syntax.  Functions are organized according to the chapter in which they are introduced in the book.  Basic functions, such as functions to calculate the magnitude of a vector, normalize a vector, test if a value is near zero, and perform matrix operations such as multiplication and inverses, are not documented here.
 
 Notation that is used throughout this document is summarized below.
 
@@ -83,7 +87,7 @@ $\omega$ & {\tt omg} & $3$-vector angular velocity. \\
 $\hat{\omega}$ & {\tt omghat} & $3$-vector unit rotation axis or unit angular velocity. \\
 $\theta$ & {\tt theta} & Angle of rotation about an axis or distance traveled along a screw axis. \\
 $\hat{\omega} \theta$ & {\tt expc3} & $3$-vector of exponential coordinates for rotation. \\
-$[\omega], [\hat{\omega} \theta] $ & {\tt so3mat} & $3 \times 3$ $so(3)$ representation of $\omega$ or $\hat{\omega} \theta$. \\
+$[\omega], [\hat{\omega} \theta] $ & {\tt so3mat} & $3 \times 3$ skew-symmetric $so(3)$ representation of $\omega$ or $\hat{\omega} \theta$. \\
 $p$ & {\tt p} & $3$-vector for a position in space. \\
 $T$ & {\tt T} & $4 \times 4$ transformation matrix in $SE(3)$ corresponding to $(R,p)$. \\
 $[\operatorname{Ad}_T]$ & {\tt AdT} & $6 \times 6$ matrix adjoint representation of $T \in SE(3)$. \\
@@ -93,8 +97,8 @@ $\mathcal{S}$ & {\tt S} & A normalized $6$-vector screw axis $(\omega,v)$, where
 $\mathcal{S}\theta$ & {\tt expc6} & $6$-vector of exponential coordinates for rigid-body motion. \\
 $[\mathcal{V}], [\mathcal{S} \theta]$ & {\tt se3mat} & $4 \times 4$ $se(3)$ representation of $\mathcal{V}$ or $\mathcal{S} \theta$. \\
 $M$ & {\tt M} & End-effector configuration in $SE(3)$ when manipulator is at its zero position. \\
-$\mathcal{B}_i$ & {\tt Blist} & $\mathcal{B}_i$ is the screw axis of the $i$th joint expressed in the end-effector frame when the manipulator is at the zero position.  {\tt Blist} is a list of all the joint screw axes for the manipulator, $i = 1 \ldots n$. \\
-$\mathcal{S}_i$ & {\tt Slist} & $\mathcal{S}_i$ is the screw axis of the $i$th joint expressed in the space frame when the manipulator is at the zero position.  {\tt Slist} is a list of all the joint screw axes for the manipulator,  $i = 1 \ldots n$. \\
+$\mathcal{B}_i$ & {\tt Blist} & $\mathcal{B}_i$ is the screw axis of the $i$th joint expressed in the end-effector frame when the manipulator is at the zero position.  {\tt Blist} is a list of all the joint screw axes for the manipulator, $i = 1, \ldots, n$. \\
+$\mathcal{S}_i$ & {\tt Slist} & $\mathcal{S}_i$ is the screw axis of the $i$th joint expressed in the space frame when the manipulator is at the zero position.  {\tt Slist} is a list of all the joint screw axes for the manipulator,  $i = 1, \ldots, n$. \\
 $J_b, J_s$ & {\tt Jb}, {\tt Js} & The $6 \times n$ manipulator Jacobian for a robot with $n$ joints, expressed in the end-effector frame ($J_b$) or the space frame ($J_s$). \\
 ${\epsilon}_{\omega}$ & {\tt eomg} & A small positive tolerance on the end-effector orientation error when calculating numerical inverse kinematics. \\
 ${\epsilon}_{\nu}$ & {\tt ev} & A small positive tolerance on the end-effector linear position error when calculating numerical inverse kinematics. \\
@@ -107,15 +111,15 @@ $\ddot{\theta}_i$ & {\tt ddthetalist} & $\ddot{\theta}_i$ is the acceleration of
 & {\tt dthetamat} & An $N \times n$ matrix where each row represents $\ddot{\theta}$ one timestep after the row preceding it in the matrix. \\
 $\mathfrak{g}$ & {\tt g} & $3$-vector for gravitational acceleration. \\
 $\tilde{\mathfrak{g}}$ & {\tt gtilde} & A possibly incorrect model for $\mathfrak{g}$ used by a controller. \\
-$M_{i-1,i} $ & {\tt Mlist} & $M_{i-1,i} \in SE(3)$ is the configuration of manipulator link $i$ relative to link $i-1$ when the manipulator is at its zero position.  The link frames are defined at the link centers of mass.  {\tt Mlist} is a list of all $M_{i-1,i}$ for $i = 1 \ldots n+1$.  The frame $\{n+1\}$ is the end-effector frame, and it is fixed relative to the frame $\{n\}$ of the last link.  It simply offers the opportunity to define an end-effector frame other than at the center of mass of the last link. \\
+$M_{i-1,i} $ & {\tt Mlist} & $M_{i-1,i} \in SE(3)$ is the configuration of manipulator link $i$ relative to link $i-1$ when the manipulator is at its zero position.  The link frames are defined at the link centers of mass.  {\tt Mlist} is a list of all $M_{i-1,i}$ for $i = 1, \ldots, n+1$.  The frame $\{n+1\}$ is the end-effector frame, and it is fixed relative to the frame $\{n\}$ of the last link.  It simply offers the opportunity to define an end-effector frame other than at the center of mass of the last link. \\
 & {\tt Mtildelist} & A possibly incorrect model for {\tt Mlist} used by a controller. \\
 $\mathcal{F}_{\text{tip}}$ & {\tt Ftip} & $6$-vector wrench applied by the manipulator end-effector, expressed in the end-effector frame $\{n+1\}$. \\
 & {\tt Ftipmat} & An $N \times 6$ matrix where each row represents $\mathcal{F}_{\text{tip}}$ one timestep after the row preceding it in the matrix. \\
-$\mathcal{G}_i$ & {\tt Glist} & $\mathcal{G}_i$ is the $6\times 6$ spatial inertia matrix for link $i$ of the manipulator, and {\tt Glist} is a list of all $\mathcal{G}_i$ for $i = 1 \ldots n$. \\
+$\mathcal{G}_i$ & {\tt Glist} & $\mathcal{G}_i$ is the $6\times 6$ spatial inertia matrix for link $i$ of the manipulator, and {\tt Glist} is a list of all $\mathcal{G}_i$ for $i = 1, \ldots, n$. \\
 & {\tt Gtildelist} & A possibly incorrect model for {\tt Glist} used by a controller. \\
-$\tau_i$ & {\tt taulist} & $\tau_i$ is the generalized force applied at joint $i$, and {\tt taulist} is the list of all joint torques $\tau = (\tau_1, \ldots, \tau_n)$. \\
+$\tau_i$ & {\tt taulist} & $\tau_i$ is the generalized force applied at joint $i$, and {\tt taulist} is the list of all joint forces/torques $\tau = (\tau_1, \ldots, \tau_n)$. \\
 & {\tt taumat} & An $N \times n$ matrix where each row represents $\tau$ one timesetep after the row preceding it in the matrix. \\
-$[\operatorname{ad}_{\mathcal{V}}]$ & {\tt adV} & $6 \times 6$ matrix adjoint representation of $\mathcal{V} \in se(3)$, used to calculate the Lie bracket of two twists, $[\mathcal{V}_1, \mathcal{V}_2] = [\operatorname{ad}_{\mathcal{V}_1}] \mathcal{V}_2$. \\
+$[\operatorname{ad}_{\mathcal{V}}]$ & {\tt adV} & $6 \times 6$ matrix adjoint representation of $\mathcal{V} \in se(3)$, used to calculate the Lie bracket of two twists, $[\operatorname{ad}_{\mathcal{V}_1}] \mathcal{V}_2$. \\
 $T_f$ & {\tt Tf} & The total time of a motion in seconds from rest to rest when calculating trajectories. \\
 $\Delta t$ & {\tt dt} & A timestep (e.g., between consecutive rows in a matrix representing a trajectory or force history). \\
 $t$ & {\tt t} & The current time. \\
@@ -172,7 +176,7 @@ $K_d$ & {\tt Kd} & A scalar feedback derivative gain.\\
 
 \begin{function}			%MatrixExp3
 {R = MatrixExp3(so3mat)}
-{\item \verb~so3mat~: An $so(3)$ representation of exponential coordinates.}
+{\item \verb~so3mat~: An $so(3)$ representation of exponential coordinates for rotation, $[\hat{\omega} \theta]$.}
 {\item \verb~R~: The $R^\prime \in SO(3)$ that is achieved by rotating about $\hat{\omega}$ by $\theta$ from an initial orientation $R=I$.}
 {}
 \end{function}
@@ -232,7 +236,6 @@ $K_d$ & {\tt Kd} & A scalar feedback derivative gain.\\
 {}
 \end{function}
 
-
 \begin{function}			%ScrewToAxis
 {S = ScrewToAxis(q,s,h)}
 {
@@ -256,7 +259,7 @@ $K_d$ & {\tt Kd} & A scalar feedback derivative gain.\\
 
 \begin{function}			%MatrixExp6
 {T = MatrixExp6(se3mat)}
-{\item \verb~se3mat~: An $se(3)$ representation of exponential coordinates for rigid-body motion.}
+{\item \verb~se3mat~: An $se(3)$ representation of exponential coordinates for rigid-body motion, $[\mathcal{S}\theta]$.}
 {\item \verb~T~: The $T^\prime \in SE(3)$ that is achieved by traveling along/about the screw axis $\mathcal{S}$ a distance $\theta$ from an initial configuration $T=I$.}
 {}
 \end{function}
@@ -266,7 +269,6 @@ $K_d$ & {\tt Kd} & A scalar feedback derivative gain.\\
 {\item \verb~T~: Transformation matrix.}
 {\item \verb~se3mat~: The corresponding $se(3)$ representation of exponential coordinates.}
 {}
-
 \end{function}
 
 
@@ -330,7 +332,7 @@ $K_d$ & {\tt Kd} & A scalar feedback derivative gain.\\
 }
 {
 \item \verb~thetalist~:  Joint variables that achieve \verb~T~ within the specified tolerances.
-\item \verb~success~:  A logical value where \verb~TRUE~ (1) means that the function found a solution and \verb~FALSE~ (0) means that it ran through the set number of maximum iterations without finding a solution within the tolerances ${\epsilon}_{\omega}$ and ${\epsilon}_{\nu}$.
+\item \verb~success~:  A logical value where \verb~TRUE~ means that the function found a solution and \verb~FALSE~ means that it ran through the set number of maximum iterations without finding a solution within the tolerances ${\epsilon}_{\omega}$ and ${\epsilon}_{\nu}$.
 }
 {The algorithm uses an iterative Newton-Raphson root-finding method starting from the initial guess {\tt thetalist0}.  The algorithm terminates when the stopping criteria are met or after a maximum number of iterations, whichever comes first. The maximum number of iterations has been hardcoded in as a variable in the function, which can be changed if desired. If the stopping criteria are not met, the function returns the last calculation of \verb~thetalist~ as well as a \verb~FALSE~ value for the success variable.}
 \end{function}
@@ -350,13 +352,12 @@ This chapter is concerned with calculating and simulating the dynamics of a seri
 \tau = M(\theta)\ddot{\theta} + c(\theta,\dot{\theta}) + g(\theta) + J^T(\theta) \mathcal{F}_{\text{tip}}.
 \]
 
-\begin{function}			%Ad
+\begin{function}			%ad
 {adV = ad(V)}
 {\item \verb~V~: A $6$-vector (e.g., a twist).}
 {\item \verb~adV~: The corresponding $6 \times 6$ matrix $[\operatorname{ad}_{\mathcal{V}}]$.}
-{Used to calculate the Lie bracket $[\mathcal{V}_1,\mathcal{V}_2] = [\operatorname{ad}_{\mathcal{V}_1}]\mathcal{V}_2$.}
+{Used to calculate the Lie bracket $[\operatorname{ad}_{\mathcal{V}_1}]\mathcal{V}_2$.}
 \end{function}
-
 
 \begin{function}			%InverseDynamics
 {taulist = InverseDynamics(thetalist,dthetalist,ddthetalist,\\
@@ -409,10 +410,9 @@ This chapter is concerned with calculating and simulating the dynamics of a seri
 \item \verb~Glist~:  Spatial inertia matrices $\mathcal{G}_i$ of the links.
 \item \verb~Slist~:  Screw axes $\mathcal{S}_i$ of the joints in a space frame.
 }
-{\item \verb~grav~: The joint forces/torques required to overcome gravity at $\theta$.}
+{\item \verb~grav~: The joint forces/torques required to balance gravity at $\theta$.}
 {This function calls \verb~InverseDynamics~ with $\dot{\theta} = \ddot{\theta} = 0$ and $\mathcal{F}_{\textrm{tip}} = 0$.}
 \end{function}
-
 
 \begin{function}			%EndEffectorForces
 {JTFtip = EndEffectorForces(thetalist,Ftip,Mlist,Glist,Slist)}
@@ -487,7 +487,7 @@ M(\theta) \ddot{\theta} = \tau - c(\theta,\dot{\theta}) - g(\theta) - J^T(\theta
 {
 \item \verb~thetalist~: $n$-vector of initial joint variables.
 \item \verb~dthetalist~: $n$-vector of initial joint velocities.
-\item \verb~taumat~: An $N \times n$ matrix of joint forces/torques, where each row is the joint effort at any instant.  The time corresponding to row $k$ is $k\Delta t$, $k \in \{0, \ldots, N\}$, where $\Delta t$ is defined below.
+\item \verb~taumat~: An $N \times n$ matrix of joint forces/torques, where each row is the joint force/torque at any instant.  The time corresponding to row $k$ is $k\Delta t$, $k \in \{0, \ldots, N-1\}$, where $\Delta t$ is defined below.
 \item \verb~g~:  Gravity vector $\mathfrak{g}$.
 \item \verb~Ftipmat~: An $N \times 6$ matrix, where each row is a vector of the form $\mathcal{F}_{\textrm{tip}}(k \Delta t)$. (If there are no tip forces the user should input a zero and a zero matrix will be used).
 \item \verb~Mlist~:  List of link frames $\{i\}$ relative to $\{i-1\}$ at the home position.
@@ -503,9 +503,7 @@ M(\theta) \ddot{\theta} = \tau - c(\theta,\dot{\theta}) - g(\theta) - J^T(\theta
 \end{function}
 
 
-
 \section*{Chapter 9: Trajectory Generation}			%Chapter 9
-
 
 \begin{function}			%CubicTimeScaling
 {s = CubicTimeScaling(Tf,t)}
@@ -513,7 +511,7 @@ M(\theta) \ddot{\theta} = \tau - c(\theta,\dot{\theta}) - g(\theta) - J^T(\theta
 \item \verb~Tf~: Total time of the motion $T_f$ in seconds from rest to rest.
 \item \verb~t~: The current time $t$ satisfying $0 \leq t \leq T_f$.
 }
-{\item \verb~s~: The path parameter $s(t)$ corresponding to a third-order polynomial motion that begins (at $s=0$) and ends (at $s=1$) at zero velocity.}
+{\item \verb~s~: The path parameter $s(t)$ corresponding to a third-order polynomial motion that begins (at $s(0)=0$) and ends (at $s(T_f)=1$) at zero velocity.}
 {}
 \end{function}
 
@@ -523,7 +521,7 @@ M(\theta) \ddot{\theta} = \tau - c(\theta,\dot{\theta}) - g(\theta) - J^T(\theta
 \item \verb~Tf~: Total time of the motion $T_f$ in seconds from rest to rest.
 \item \verb~t~: The current time $t$ satisfying $0 \leq t \leq T_f$.
 }
-{\item \verb~s~: The path parameter $s(t)$ corresponding to a fifth-order polynomial motion that begins (at $s=0$) and ends (at $s=1$) at zero velocity and zero acceleration.}
+{\item \verb~s~: The path parameter $s(t)$ corresponding to a fifth-order polynomial motion that begins (at $s(0)=0$) and ends (at $s(T_f)=1$) at zero velocity and zero acceleration.}
 {}
 \end{function}
 
@@ -553,7 +551,6 @@ M(\theta) \ddot{\theta} = \tau - c(\theta,\dot{\theta}) - g(\theta) - J^T(\theta
 {This function calculates a trajectory corresponding to a screw motion about a constant screw axis.}
 \end{function}
 
-
 \begin{function}			%CartesianTrajectory
 {traj = CartesianTrajectory(Xstart,Xend,Tf,N,method)}
 {
@@ -567,15 +564,16 @@ M(\theta) \ddot{\theta} = \tau - c(\theta,\dot{\theta}) - g(\theta) - J^T(\theta
 {Similar to {\tt ScrewTrajectory}, except the origin of the end-effector frame follows a straight line, decoupled from the rotational motion.}
 \end{function}
 
+
 \section*{Chapter 11:  Robot Control}			%Chapter 11
 
-The two functions in this chapter focus on the use of the feedback linearizing controller
+The two functions in this chapter focus on the use of the computed torque controller
 \[
 \tau = \widehat{M}(\theta) \left(\ddot{\theta}_d + K_p \theta_e + K_i \int \theta_e(t) dt + K_d \dot{\theta}_e\right) + \widehat{h}(\theta,\dot{\theta})
 \]
-to control the motion of a serial chain in free space.  The term $\widehat{h}(\theta,\dot{\theta})$ comprises the model of Coriolis forces and gravitational forces.
+to control the motion of a serial chain in free space.  The term $\widehat{h}(\theta,\dot{\theta})$ comprises the model of centripetal, Coriolis, and gravitational forces, and the term $\widehat{M}(\theta)$ is the model of the robot's mass matrix.
 
-\begin{function}			%FBLinearizingControl
+\begin{function}			%ComputedTorque
 {taulist = ComputedTorque(thetalist,dthetalist,eint,g,\\
 \hspace*{1in} Mlist,Glist,Slist,thetalistd,dthetalistd,ddthetalistd,Kp,Ki,Kd)}
 {

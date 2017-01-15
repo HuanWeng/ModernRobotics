@@ -1,11 +1,9 @@
 '''
 ***************************************************************************
-Library of functions written to accompany the algorithms described in
+Robotic Library written to accompany the algorithms described in
 Modern Robotics: Mechanics, Planning, and Control.
 ***************************************************************************
-Author: Mikhail Todes, Huan Weng
-Email: mikhail@u.northwestern.edu
-Github: https://github.com/NxRLab/ModernRobotics
+Author: Huan Weng, Mikhail Todes 
 Date: December 2016
 ***************************************************************************
 Language: Python
@@ -386,6 +384,8 @@ def FKinBody(M,Blist,thetalist):
 #at the specified coordinates (i.t.o Body Frame).
     '''
 Example Input: 
+import numpy as np
+from math import pi
 M = [[-1, 0, 0, 0], [0, 1, 0, 6], [0, 0, -1, 2], [0, 0, 0, 1]]
 Blist = np.array([[0, 0, -1, 2, 0,   0],
                   [0, 0,  0, 0, 1,   0], 
@@ -413,6 +413,8 @@ def FKinSpace(M,Slist,thetalist):
 #at the specified coordinates (i.t.o Space Frame).
     '''
 Example Input: 
+import numpy as np
+from math import pi
 M = [[-1, 0, 0, 0], [0, 1, 0, 6], [0, 0, -1, 2], [0, 0, 0, 1]]
 Slist = np.array([[0, 0,  1,  4, 0,    0],
                   [0, 0,  0,  0, 1,    0],
@@ -441,6 +443,7 @@ def JacobianBody(Blist,thetalist):
 #Returns the corresponding body Jacobian (6xn real numbers).
     '''
 Example Input: 
+import numpy as np
 Blist = np.array([[0, 0, 1,   0, 0.2, 0.2], 
                   [1, 0, 0,   2,   0,   3], 
                   [0, 1, 0,   0,   2,   1], 
@@ -469,6 +472,7 @@ def JacobianSpace(Slist, thetalist):
 #Returns the corresponding space Jacobian (6xn real numbers).
     '''
 Example Input: 
+import numpy as np
 Slist = np.array([[0, 0, 1,   0, 0.2, 0.2], 
                   [1, 0, 0,   2,   0,   3], 
                   [0, 1, 0,   0,   2,   1], 
@@ -519,6 +523,7 @@ def IKinBody(Blist,M,T,thetalist0,eomg,ev):
 #the start of the function, but can be changed if needed.  
     '''
 Example Input: 
+import numpy as np
 Blist = np.array([[0, 0, -1, 2, 0,   0],
                   [0, 0,  0, 0, 1,   0], 
                   [0, 0,  1, 0, 0, 0.1]]).T
@@ -577,6 +582,7 @@ def IKinSpace(Slist,M,T,thetalist0,eomg,ev):
 #the start of the function, but can be changed if needed.  
     '''
 Example Input: 
+import numpy as np
 Slist = np.array([[0, 0,  1,  4, 0,    0],
                   [0, 0,  0,  0, 1,    0],
                   [0, 0, -1, -6, 0, -0.1]]).T
@@ -652,6 +658,7 @@ def InverseDynamics(thetalist,dthetalist,ddthetalist,g,Ftip,Mlist,Glist, \
 #          + g(thetalist) + Jtr(thetalist)Ftip
     '''
 Example Input (3 Link Robot):
+import numpy as np
 thetalist = [0.1, 0.1, 0.1]
 dthetalist = [0.1, 0.2, 0.3]
 ddthetalist = [2, 1.5, 1]
@@ -714,6 +721,7 @@ def MassMatrix(thetalist,Mlist,Glist,Slist):
 #are assembled to create the inertia matrix.
     '''
 Example Input (3 Link Robot):
+import numpy as np
 thetalist = [0.1, 0.1, 0.1]
 M01 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.089159], [0, 0, 0, 1]]
 M12 = [[0, 0, 1, 0.28], [0, 1, 0, 0.13585], [-1, 0, 0, 0],[0, 0, 0, 1]]
@@ -754,6 +762,7 @@ def VelQuadraticForces(thetalist,dthetalist,Mlist,Glist,Slist):
 #ddthetalist = 0.
     '''
 Example Input (3 Link Robot):
+import numpy as np
 thetalist = [0.1, 0.1, 0.1]
 dthetalist = [0.1, 0.2, 0.3]
 M01 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.089159], [0, 0, 0, 1]]
@@ -786,6 +795,7 @@ def GravityForces(thetalist,g,Mlist,Glist,Slist):
 #ddthetalist = 0.
     '''
 Example Inputs (3 Link Robot):
+import numpy as np
 thetalist = [0.1, 0.1, 0.1]
 g = [0, 0, -9.8]
 M01 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.089159], [0, 0, 0, 1]]
@@ -820,6 +830,7 @@ def EndEffectorForces(thetalist,Ftip,Mlist,Glist,Slist):
 #ddthetalist = 0.
     '''
 Example Input (3 Link Robot):
+import numpy as np
 thetalist = [0.1, 0.1, 0.1]
 Ftip = [1, 1, 1, 1, 1, 1]
 M01 = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0.089159], [0, 0, 0, 1]]
@@ -857,6 +868,7 @@ def ForwardDynamics(thetalist,dthetalist,taulist,g,Ftip,Mlist,Glist,Slist):
 #                              - g(thetalist) - Jtr(thetalist)Ftip
     '''
 Example Input (3 Link Robot):
+import numpy as np
 thetalist = [0.1, 0.1, 0.1]
 dthetalist = [0.1, 0.2, 0.3]
 taulist = [0.5, 0.6, 0.7]
@@ -928,9 +940,9 @@ def InverseDynamicsTrajectory(thetamat,dthetamat,ddthetamat,g,Ftipmat, \
 #required to move the serial chain along the given trajectory.
     '''
 #Example Inputs (3 Link Robot):
-from math import pi
 import numpy as np
-from robot_calc_functions import *
+from math import pi
+from modern_robotics import JointTrajectory
 import matplotlib.pyplot as plt
 #Create a trajectory to follow using functions from Chapter 9
 thetastart =[0, 0, 0]
@@ -1016,9 +1028,7 @@ def ForwardDynamicsTrajectory(thetalist,dthetalist,taumat,g,Ftipmat, \
 #It calls a numerical integration procedure that uses ForwardDynamics.
     '''
 #Example Inputs (3 Link Robot):
-from math import pi
 import numpy as np
-from robot_calc_functions import *
 import matplotlib.pyplot as plt
 thetalist = [0.1, 0.1, 0.1]
 dthetalist = [0.1, 0.2, 0.3]
@@ -1048,7 +1058,6 @@ thetamat,dthetamat \
 = ForwardDynamicsTrajectory(thetalist,dthetalist,taumat,g,Ftipmat,Mlist, \
                             Glist,Slist,dt,intRes)
 #Output using matplotlib to plot the joint angle/velocities
-import matplotlib.pyplot as plt
 theta1 = thetamat[:,0]
 theta2 = thetamat[:,1]
 theta3 = thetamat[:,2]
@@ -1297,6 +1306,7 @@ def ComputedTorque(thetalist,dthetalist,eint,g,Mlist,Glist,Slist, \
 #                 feedback linearizing controller at the current instant.
     '''
 Example Input: 
+import numpy as np
 thetalist = [0.1, 0.1, 0.1]
 dthetalist = [0.1, 0.2, 0.3]
 eint = [0.2, 0.2, 0.2]
@@ -1369,7 +1379,7 @@ def SimulateControl(thetalist,dthetalist,g,Ftipmat,Mlist,Glist,Slist, \
 #Example Input: 
 from math import pi
 import numpy as np
-from robot_calc_functions import *
+from modern_robotics import JointTrajectory
 thetalist = [0.1, 0.1, 0.1]
 dthetalist = [0.1, 0.2, 0.3]
 #Initialise robot description (Example with 3 links)

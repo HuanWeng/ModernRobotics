@@ -1,6 +1,6 @@
 '''
 ***************************************************************************
-Robotic Library written to accompany the algorithms described in
+Library of functions written to accompany the algorithms described in
 Modern Robotics: Mechanics, Planning, and Control.
 ***************************************************************************
 Author: Huan Weng, Mikhail Todes 

@@ -6,11 +6,11 @@ function judge = NearZero(near)
 % Example Input:
 %{ 
   clear;clc;
-  near = -1e-6;
+  near = -1e-7;
   judge = NearZero(near)
 %} 
 % Output:
 % judge =
 %     1
 
-judge = norm(near) < 1e-5;
+judge = norm(near) < 1e-6;

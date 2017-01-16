@@ -30,11 +30,11 @@ def NearZero(z):
 #Checks if the scalar is small enough to be neglected.
     '''
 Example Input:
-z = -1e-6
+z = -1e-7
 Output:
 True
     '''
-    return abs(z) < 1e-5
+    return abs(z) < 1e-6
    
 def Normalize(V):
 #Takes a vector.
